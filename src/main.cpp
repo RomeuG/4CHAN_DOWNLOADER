@@ -81,6 +81,16 @@ void traverse_dom_trees(xmlNode * a_node)
     }
 }
 
+xmlNode *htmlparse_get_body(xmlNode *root_node)
+{
+	xmlNode *possible_body = root_node->children->next;
+	if (strncmp((char*)possible_body->name, "body", 5) == 0) {
+		return possible_body;
+	}
+
+	return nullptr;
+}
+
 int main(int argc, char **argv)
 {
 	CURL *conn = nullptr;
@@ -127,7 +137,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	traverse_dom_trees(root_element);
+
+	xmlNode *html_body = htmlparse_get_body(root_element);
+	traverse_dom_trees(html_body);
 
 	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
