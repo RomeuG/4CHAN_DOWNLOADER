@@ -1,5 +1,7 @@
 #include <iostream>
+#include <string.h>
 
+#include <libxml2/libxml/HTMLparser.h>
 #include <curl/curl.h>
 
 static int writer(char *data, size_t size, size_t nmemb, std::string *writer_data)
@@ -58,6 +60,27 @@ static bool init(CURL *&conn, char *url, std::string &buffer)
 	return true;
 }
 
+void traverse_dom_trees(xmlNode * a_node)
+{
+    xmlNode *cur_node = nullptr;
+
+    if(a_node == nullptr) {
+        return;
+    }
+
+    for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+		if (cur_node->type == XML_ELEMENT_NODE)	{
+			/* Check for if current node should be exclude or not */
+			printf("Node type: Text, name: %s\n", cur_node->name);
+		} else if (cur_node->type == XML_TEXT_NODE) {
+			/* Process here text node, It is available in cpStr :TODO: */
+			printf("node type: Text, node content: %s,  content length %d\n", (char *)cur_node->content, strlen((char *)cur_node->content));
+		}
+
+		traverse_dom_trees(cur_node->children);
+    }
+}
+
 int main(int argc, char **argv)
 {
 	CURL *conn = nullptr;
@@ -86,7 +109,26 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	std::cout << buffer;
+	//std::cout << buffer;
+	// testing html parsing
+	htmlDocPtr doc;
+	xmlNode *root_element = nullptr;
 
+	doc = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
+	if (doc == nullptr) {
+		std::printf("Error parsing html.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	root_element = xmlDocGetRootElement(doc);
+	if (root_element == nullptr) {
+		std::printf("Error getting root element.\n");
+		xmlFreeDoc(doc);
+		exit(EXIT_FAILURE);
+	}
+
+	traverse_dom_trees(root_element);
+
+	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
 }
