@@ -166,10 +166,16 @@ int main(int argc, char **argv)
 	}
 
 	auto root = new xmlpp::Element(root_element);
-	auto elements = root->find("head/link");
-	auto element = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("href");
 
-	print_xml(root_element);
+	auto elements = root->find("//img");
+	//auto element = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("href");
+
+	for (auto& element : elements) {
+		auto link = std::string(reinterpret_cast<xmlpp::Element *>(element)->get_attribute_value("src"));
+		std::printf("Image link: %s\n", link.c_str());
+	}
+
+	//print_xml(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
