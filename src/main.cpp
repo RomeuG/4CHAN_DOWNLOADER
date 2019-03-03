@@ -63,7 +63,6 @@ bool download_img(char *url)
 
 static bool init(CURL *& conn, char *url, std::string& buffer)
 {
-	CURLcode code;
 	char curl_error_buffer[CURL_ERROR_SIZE];
 
 	conn = curl_easy_init();
@@ -94,7 +93,7 @@ void traverse_dom_trees(xmlNode *a_node)
 		if (cur_node->type == XML_ELEMENT_NODE) {
 			std::printf("Node type: Text, name: %s\n", cur_node->name);
 		} else if (cur_node->type == XML_TEXT_NODE) {
-			std::printf("node type: Text, node content: %s,  content length %d\n", (char *) cur_node->content, strlen((char *) cur_node->content));
+			std::printf("node type: Text, node content: %s,  content length %zu\n", (char *) cur_node->content, strlen((char *) cur_node->content));
 		}
 
 		traverse_dom_trees(cur_node->children);
@@ -144,8 +143,7 @@ int main(int argc, char **argv)
 	htmlDocPtr doc;
 	xmlNode *root_element = nullptr;
 
-	doc = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr,
-						 HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
+	doc = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
 	if (doc == nullptr) {
 		std::printf("Error parsing html.\n");
 		exit(EXIT_FAILURE);
