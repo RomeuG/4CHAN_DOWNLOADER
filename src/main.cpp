@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 
+#include <libxml++-3.0/libxml++/libxml++.h>
 #include <libxml2/libxml/HTMLparser.h>
 #include <curl/curl.h>
 
@@ -155,6 +156,8 @@ int main(int argc, char **argv)
 		xmlFreeDoc(doc);
 		exit(EXIT_FAILURE);
 	}
+
+	auto root = new xmlpp::Element(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	traverse_dom_trees(html_body);
