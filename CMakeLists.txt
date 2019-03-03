@@ -3,6 +3,10 @@ project(4CHAN_DOWNLOADER)
 
 set(CMAKE_CXX_STANDARD 14)
 
+include_directories(/usr/include/libxml2)
+
+set(CMAKE_CXX_FLAGS "-ggdb3 -O0 -lxml2 -lcurl")
+
 add_executable(4CHAN_DOWNLOADER
         src/main.cpp
         README.md)
