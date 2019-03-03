@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 #include <libxml2/libxml/HTMLparser.h>
 #include <curl/curl.h>
