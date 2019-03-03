@@ -111,6 +111,14 @@ xmlNode *htmlparse_get_body(xmlNode *root_node)
 	return nullptr;
 }
 
+void print_xml(xmlNode *element)
+{
+	xmlBufferPtr _buffer = xmlBufferCreate();
+	auto dump = xmlNodeDump(_buffer, nullptr, element, 2, 1);
+	auto result = strdup((char *) xmlBufferContent(_buffer));
+	std::printf("Result: %s\n", result);
+}
+
 int main(int argc, char **argv)
 {
 	CURL *conn = nullptr;
@@ -158,9 +166,13 @@ int main(int argc, char **argv)
 	}
 
 	auto root = new xmlpp::Element(root_element);
+	auto elements = root->find("head/link");
+	auto element = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("href");
+
+	print_xml(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
-	traverse_dom_trees(html_body);
+	//traverse_dom_trees(html_body);
 
 	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
