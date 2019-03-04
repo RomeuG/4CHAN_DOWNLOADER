@@ -7,6 +7,14 @@
 
 #include <boost/algorithm/string.hpp>
 
+std::vector<std::string> split_str(const std::string &string, const char delimiter)
+{
+	std::vector<std::string> results;
+	boost::split(results, string, [delimiter](char c){return c == delimiter;});
+
+	return results;
+}
+
 static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data)
 {
 	if (writer_data == nullptr) {
@@ -193,8 +201,7 @@ int main(int argc, char **argv)
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
 
-	std::vector<std::string> results;
-	boost::split(results, img_link, [](char c){return c == '/';});
+	auto results = split_str(img_link, '/');
 	for (std::string &str : results) { std::printf("%s\n", str.c_str()); }
 
 	xmlFreeDoc(doc);
