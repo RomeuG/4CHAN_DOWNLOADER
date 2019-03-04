@@ -3,6 +3,8 @@ project(4CHAN_DOWNLOADER)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include_directories(/usr/include/libxml2)
 include_directories(/usr/include/libxml++-3.0)
 include_directories(/usr/lib/libxml++-3.0/include)

@@ -27,7 +27,20 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
 }
 
-bool download_img(char *url)
+std::vector<std::string> split_string(const std::string& s, char delimiter)
+{
+	std::vector<std::string> tokens;
+	std::string token;
+
+	std::istringstream tokenStream(s);
+	while (std::getline(tokenStream, token, delimiter))	{
+		tokens.push_back(token);
+	}
+
+	return tokens;
+}
+
+bool download_img(const char *url)
 {
 	auto fp = std::fopen("out.jpg", "wb");
 	if (!fp) {
@@ -60,6 +73,16 @@ bool download_img(char *url)
 	fclose(fp);
 
 	return true;
+}
+
+void download_imgs(std::vector<std::string> &list)
+{
+	for (std::string &url : list) {
+		auto res = download_img(url.c_str());
+		if (!res) {
+			std::printf("Error downloading image from %s\n", url.c_str());
+		}
+	}
 }
 
 static bool init(CURL *& conn, char *url, std::string& buffer)
@@ -168,17 +191,21 @@ int main(int argc, char **argv)
 	auto root = new xmlpp::Element(root_element);
 
 	auto elements = root->find("//img");
-	//auto element = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("href");
+	auto img_link = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("src");
+	std::printf("Link: %s", img_link.c_str());
 
-	for (auto& element : elements) {
-		auto link = std::string(reinterpret_cast<xmlpp::Element *>(element)->get_attribute_value("src"));
-		std::printf("Image link: %s\n", link.c_str());
-	}
+	// for (auto& element : elements) {
+	// 	auto link = std::string(reinterpret_cast<xmlpp::Element *>(element)->get_attribute_value("src"));
+	// 	std::printf("Image link: %s\n", link.c_str());
+	// }
 
 	//print_xml(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
+
+	auto a = split_string(img_link, '/');
+	for (std::string &str : a) { std::printf("%s\n", str.c_str()); }
 
 	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
