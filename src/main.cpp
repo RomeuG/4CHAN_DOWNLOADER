@@ -5,6 +5,8 @@
 #include <libxml2/libxml/HTMLparser.h>
 #include <curl/curl.h>
 
+#include <boost/algorithm/string.hpp>
+
 static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data)
 {
 	if (writer_data == nullptr) {
@@ -25,19 +27,6 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	}
 
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
-}
-
-std::vector<std::string> split_string(const std::string& s, char delimiter)
-{
-	std::vector<std::string> tokens;
-	std::string token;
-
-	std::istringstream tokenStream(s);
-	while (std::getline(tokenStream, token, delimiter))	{
-		tokens.push_back(token);
-	}
-
-	return tokens;
 }
 
 bool download_img(const char *url)
@@ -204,8 +193,9 @@ int main(int argc, char **argv)
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
 
-	auto a = split_string(img_link, '/');
-	for (std::string &str : a) { std::printf("%s\n", str.c_str()); }
+	std::vector<std::string> results;
+	boost::split(results, img_link, [](char c){return c == '/';});
+	for (std::string &str : results) { std::printf("%s\n", str.c_str()); }
 
 	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
