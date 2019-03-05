@@ -37,6 +37,40 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
 }
 
+std::string download_html(char *url)
+{
+	CURL *conn = nullptr;
+	CURLcode code;
+
+	std::string buffer;
+	char curl_error_buffer[CURL_ERROR_SIZE];
+
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
+	conn = curl_easy_init();
+
+	if (conn == nullptr) {
+		std::printf("Failed to create CURL connection\n");
+		return nullptr;
+	}
+
+	curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, curl_error_buffer);
+	curl_easy_setopt(conn, CURLOPT_URL, url);
+	curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, curlcb_html);
+	curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
+
+	code = curl_easy_perform(conn);
+	curl_easy_cleanup(conn);
+
+	if (code != CURLE_OK) {
+		std::printf("Failed to get '%s' [%s]\n", url, curl_error_buffer);
+		exit(EXIT_FAILURE);
+	}
+
+	return buffer;
+}
+
 bool download_img(const char *url)
 {
 	auto fp = std::fopen("out.jpg", "wb");
@@ -82,26 +116,6 @@ void download_imgs(std::vector<std::string> &list)
 	}
 }
 
-static bool init(CURL *& conn, char *url, std::string& buffer)
-{
-	char curl_error_buffer[CURL_ERROR_SIZE];
-
-	conn = curl_easy_init();
-
-	if (conn == nullptr) {
-		std::printf("Failed to create CURL connection\n");
-		return false;
-	}
-
-	curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, curl_error_buffer);
-	curl_easy_setopt(conn, CURLOPT_URL, url);
-	curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, curlcb_html);
-	curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
-
-	return true;
-}
-
 void traverse_dom_trees(xmlNode *a_node)
 {
 	xmlNode *cur_node = nullptr;
@@ -141,33 +155,8 @@ void print_xml(xmlNode *element)
 
 int main(int argc, char **argv)
 {
-	CURL *conn = nullptr;
-	CURLcode code;
+	std::string buffer = download_html(argv[1]);
 
-	std::string buffer;
-	char curl_error_buffer[CURL_ERROR_SIZE];
-
-	if (argc != 2) {
-		std::printf("Usage: %s <url>\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
-
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	if (!init(conn, argv[1], buffer)) {
-		std::printf("Connection initialization failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	code = curl_easy_perform(conn);
-	curl_easy_cleanup(conn);
-
-	if (code != CURLE_OK) {
-		std::printf("Failed to get '%s' [%s]\n", argv[1], curl_error_buffer);
-		exit(EXIT_FAILURE);
-	}
-
-	//std::cout << buffer;
 	// testing html parsing
 	htmlDocPtr doc;
 	xmlNode *root_element = nullptr;
@@ -190,13 +179,6 @@ int main(int argc, char **argv)
 	auto elements = root->find("//img");
 	auto img_link = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("src");
 	std::printf("Link: %s", img_link.c_str());
-
-	// for (auto& element : elements) {
-	// 	auto link = std::string(reinterpret_cast<xmlpp::Element *>(element)->get_attribute_value("src"));
-	// 	std::printf("Image link: %s\n", link.c_str());
-	// }
-
-	//print_xml(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
