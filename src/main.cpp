@@ -148,9 +148,10 @@ xmlNode *htmlparse_get_body(xmlNode *root_node)
 void print_xml(xmlNode *element)
 {
 	xmlBufferPtr _buffer = xmlBufferCreate();
-	auto dump = xmlNodeDump(_buffer, nullptr, element, 2, 1);
+	xmlNodeDump(_buffer, nullptr, element, 2, 1);
 	auto result = strdup((char *) xmlBufferContent(_buffer));
 	std::printf("Result: %s\n", result);
+	xmlBufferFree(_buffer);
 }
 
 int main(int argc, char **argv)
