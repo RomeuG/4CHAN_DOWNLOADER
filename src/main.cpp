@@ -73,7 +73,10 @@ std::string download_html(char *url)
 
 bool download_img(const char *url)
 {
-	auto fp = std::fopen("out.jpg", "wb");
+	auto split_url = split_str(url, '/');
+	auto file_name = split_url.back();
+
+	auto fp = std::fopen(file_name.c_str(), "wb");
 	if (!fp) {
 		std::printf("Failed to create file on the disk\n");
 		return false;
