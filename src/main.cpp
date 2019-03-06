@@ -159,6 +159,16 @@ void print_xml(xmlNode *element)
 	xmlBufferFree(_buffer);
 }
 
+// TODO return array with simplified information about the node
+template<class T>
+void print_node_info(xmlpp::Node *node)
+{
+	auto node_vector = reinterpret_cast<T>(node);
+	auto name = node_vector->get_name();
+	auto path = node_vector->get_path();
+	auto value = node_vector->get_first_child_text()->get_content();
+}
+
 int main(int argc, char **argv)
 {
 	std::string buffer = download_html(argv[1]);
@@ -182,8 +192,10 @@ int main(int argc, char **argv)
 
 	auto root = new xmlpp::Element(root_element);
 
-	auto elements = root->find(XPATH_ALL_IMGS);
-	//	auto img_link = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("src");
+	//auto elements = root->find(XPATH_ALL_IMGS);
+	auto elements = root->find("//title");
+	print_node_info<xmlpp::Element *>(elements[0]);
+
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
