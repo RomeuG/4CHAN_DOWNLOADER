@@ -159,14 +159,24 @@ void print_xml(xmlNode *element)
 	xmlBufferFree(_buffer);
 }
 
-// TODO return array with simplified information about the node
-template<class T>
-void print_node_info(xmlpp::Node *node)
+enum
 {
+	NODE_NAME = 0,
+	NODE_PATH,
+	NODE_VALUE,
+};
+
+template<class T>
+std::array<std::string, 3> get_node_info(xmlpp::Node *node)
+{
+	std::array<std::string, 3> node_info;
 	auto node_vector = reinterpret_cast<T>(node);
-	auto name = node_vector->get_name();
-	auto path = node_vector->get_path();
-	auto value = node_vector->get_first_child_text()->get_content();
+
+	node_info[NODE_NAME] = node_vector->get_name();
+	node_info[NODE_PATH] = node_vector->get_path();
+	node_info[NODE_VALUE] = node_vector->get_first_child_text()->get_content();
+
+	return node_info;
 }
 
 int main(int argc, char **argv)
@@ -194,8 +204,7 @@ int main(int argc, char **argv)
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
 	auto elements = root->find("//title");
-	print_node_info<xmlpp::Element *>(elements[0]);
-
+	auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
