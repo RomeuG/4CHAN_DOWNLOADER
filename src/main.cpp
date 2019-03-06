@@ -7,6 +7,9 @@
 
 #include <boost/algorithm/string.hpp>
 
+// XPATH constants
+#define XPATH_ALL_IMGS "//img"
+
 std::vector<std::string> split_str(const std::string &string, const char delimiter)
 {
 	std::vector<std::string> results;
@@ -179,15 +182,11 @@ int main(int argc, char **argv)
 
 	auto root = new xmlpp::Element(root_element);
 
-	auto elements = root->find("//img");
-	auto img_link = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("src");
-	std::printf("Link: %s", img_link.c_str());
+	auto elements = root->find(XPATH_ALL_IMGS);
+	//	auto img_link = reinterpret_cast<xmlpp::Element *>(elements[0])->get_attribute_value("src");
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
-
-	auto results = split_str(img_link, '/');
-	for (std::string &str : results) { std::printf("%s\n", str.c_str()); }
 
 	xmlFreeDoc(doc);
 	return EXIT_SUCCESS;
