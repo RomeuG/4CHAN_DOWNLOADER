@@ -11,7 +11,7 @@
 #define XPATH_ALL_IMGS "//img"
 #define XPATH_TITLE "//title"
 #define XPATH_IMG_THUMB "//a/img"
-#define XPATH_A_CLASS_THUMB "//a[class='fileThumb']"
+#define XPATH_A_CLASS_THUMB "//a[@class='fileThumb']"
 
 enum {
 	NODE_NAME = 0,
