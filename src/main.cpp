@@ -11,6 +11,7 @@
 #define XPATH_ALL_IMGS "//img"
 #define XPATH_TITLE "//title"
 #define XPATH_IMG_THUMB "//a/img"
+#define XPATH_A_CLASS_THUMB "//a[class='fileThumb']"
 
 enum {
 	NODE_NAME = 0,
@@ -204,7 +205,7 @@ int main(int argc, char **argv)
 	auto root = new xmlpp::Element(root_element);
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
-	auto elements = root->find(XPATH_IMG_THUMB);
+	auto elements = root->find(XPATH_A_CLASS_THUMB);
 	auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
