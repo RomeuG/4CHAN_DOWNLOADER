@@ -9,6 +9,14 @@
 
 // XPATH constants
 #define XPATH_ALL_IMGS "//img"
+#define XPATH_TITLE "//title"
+#define XPATH_IMG_THUMB "//a/img"
+
+enum {
+	NODE_NAME = 0,
+	NODE_PATH,
+	NODE_VALUE,
+};
 
 std::vector<std::string> split_str(const std::string &string, const char delimiter)
 {
@@ -159,13 +167,6 @@ void print_xml(xmlNode *element)
 	xmlBufferFree(_buffer);
 }
 
-enum
-{
-	NODE_NAME = 0,
-	NODE_PATH,
-	NODE_VALUE,
-};
-
 template<class T>
 std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 {
@@ -203,7 +204,7 @@ int main(int argc, char **argv)
 	auto root = new xmlpp::Element(root_element);
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
-	auto elements = root->find("//title");
+	auto elements = root->find(XPATH_IMG_THUMB);
 	auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	xmlNode *html_body = htmlparse_get_body(root_element);
