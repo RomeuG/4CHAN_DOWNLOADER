@@ -206,10 +206,10 @@ int main(int argc, char **argv)
 	auto root = new xmlpp::Element(root_element);
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
-	auto elements = root->find("//a/img | // title");
+	auto elements = root->find("//img/preceding::a[1]");
 	for (auto &element : elements) {
 		auto e = reinterpret_cast<xmlpp::Element*>(element);
-		std::printf("Element tag: %s\n", e->get_name().c_str());
+		std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
 	}
 	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
