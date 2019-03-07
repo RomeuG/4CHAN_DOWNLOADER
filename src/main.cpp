@@ -14,16 +14,17 @@
 #define XPATH_A_CLASS_THUMB "//a[@class='fileThumb']"
 #define XPATH_TITLE_AND_IMGS "//title | //a/img"
 
-enum {
+enum
+{
 	NODE_NAME = 0,
 	NODE_PATH,
 	NODE_VALUE,
 };
 
-std::vector<std::string> split_str(const std::string &string, const char delimiter)
+std::vector<std::string> split_str(const std::string& string, const char delimiter)
 {
 	std::vector<std::string> results;
-	boost::split(results, string, [delimiter](char c){return c == delimiter;});
+	boost::split(results, string, [delimiter](char c) { return c == delimiter; });
 
 	return results;
 }
@@ -121,9 +122,9 @@ bool download_img(const char *url)
 	return true;
 }
 
-void download_imgs(std::vector<std::string> &list)
+void download_imgs(std::vector<std::string>& list)
 {
-	for (std::string &url : list) {
+	for (std::string& url : list) {
 		auto res = download_img(url.c_str());
 		if (!res) {
 			std::printf("Error downloading image from %s\n", url.c_str());
@@ -184,6 +185,21 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 
 int main(int argc, char **argv)
 {
+	int copts;
+
+	std::string board;
+	std::string thread;
+
+	while ((copts = getopt(argc, argv, "b:t:"))) {
+		switch (copts) {
+			case 'b': board = optarg;
+				break;
+			case 't': thread = optarg;
+				break;
+			default: break;
+		}
+	}
+
 	std::string buffer = download_html(argv[1]);
 
 	// testing html parsing
@@ -207,13 +223,13 @@ int main(int argc, char **argv)
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
 	auto elements = root->find("//img/preceding::a[1]");
-	for (auto &element : elements) {
-		auto e = reinterpret_cast<xmlpp::Element*>(element);
+	for (auto& element : elements) {
+		auto e = reinterpret_cast<xmlpp::Element *>(element);
 		std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
 	}
 	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
-		xmlNode *html_body = htmlparse_get_body(root_element);
+	xmlNode *html_body = htmlparse_get_body(root_element);
 	//traverse_dom_trees(html_body);
 
 	xmlFreeDoc(doc);
