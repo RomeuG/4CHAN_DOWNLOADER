@@ -85,6 +85,24 @@ std::string download_html(char *url)
 	return buffer;
 }
 
+bool convert_to_xmltree(std::string buffer, htmlDocPtr *document, xmlNode **root)
+{
+	*document = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
+	if (document == nullptr) {
+		std::printf("Error parsing html.\n");
+		return false;
+	}
+
+	*root = xmlDocGetRootElement(*document);
+	if (*root == nullptr) {
+		std::printf("Error getting root element.\n");
+		xmlFreeDoc(*document);
+		return false;
+	}
+
+	return true;
+}
+
 bool download_img(const char *url)
 {
 	auto file_name = split_str(url, '/').back();
@@ -206,16 +224,9 @@ int main(int argc, char **argv)
 	htmlDocPtr doc;
 	xmlNode *root_element = nullptr;
 
-	doc = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
-	if (doc == nullptr) {
-		std::printf("Error parsing html.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	root_element = xmlDocGetRootElement(doc);
-	if (root_element == nullptr) {
-		std::printf("Error getting root element.\n");
-		xmlFreeDoc(doc);
+	auto result = convert_to_xmltree(buffer, &doc, &root_element);
+	if (!result) {
+		std::printf("Something went terribly wrong.\n");
 		exit(EXIT_FAILURE);
 	}
 
