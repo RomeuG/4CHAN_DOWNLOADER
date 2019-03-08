@@ -235,25 +235,25 @@ int main(int argc, char **argv)
 
 	// testing html parsing
 	htmlDocPtr doc;
-	xmlNode *root_element = nullptr;
+	xmlNode *root = nullptr;
 
-	auto result = convert_to_xmltree(buffer, &doc, &root_element);
+	auto result = convert_to_xmltree(buffer, &doc, &root);
 	if (!result) {
 		std::printf("Something went terribly wrong.\n");
 		exit(EXIT_FAILURE);
 	}
 
-	auto root = new xmlpp::Element(root_element);
+	auto root_element = new xmlpp::Element(root);
 
 	//auto elements = root->find(XPATH_ALL_IMGS);
-	auto elements = root->find("//img/preceding::a[1]");
+	auto elements = root_element->find("//img/preceding::a[1]");
 	for (auto& element : elements) {
 		auto e = reinterpret_cast<xmlpp::Element *>(element);
 		std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
 	}
 	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
-	xmlNode *html_body = htmlparse_get_body(root_element);
+	xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
 
 	xmlFreeDoc(doc);
