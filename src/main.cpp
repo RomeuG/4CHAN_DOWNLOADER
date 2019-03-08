@@ -207,14 +207,27 @@ int main(int argc, char **argv)
 
 	std::string board;
 	std::string thread;
+	std::string index_page;
 
-	while ((copts = getopt(argc, argv, "b:t:"))) {
+	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-			case 'b': board = optarg;
-				break;
-			case 't': thread = optarg;
-				break;
-			default: break;
+		case 'b':
+			board = optarg;
+			break;
+		case 'c':
+			// TODO: download catalog with first post information
+			break;
+		case 'h':
+			// TODO
+			std::printf("Usage: ./program etc");
+			break;
+		case 'p':
+			index_page = optarg;
+			break;
+		case 't':
+			thread = optarg;
+			break;
+		default: break;
 		}
 	}
 
