@@ -51,7 +51,7 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
 }
 
-std::string download_html(char *url)
+std::string download_html(const char *url)
 {
 	CURL *conn = nullptr;
 	CURLcode code;
@@ -209,6 +209,9 @@ int main(int argc, char **argv)
 	std::string thread;
 	std::string index_page;
 
+	htmlDocPtr doc = nullptr;
+	xmlNode *root = nullptr;
+
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
 		case 'b':
@@ -231,29 +234,25 @@ int main(int argc, char **argv)
 		}
 	}
 
-	std::string buffer = download_html(argv[1]);
-
-	// testing html parsing
-	htmlDocPtr doc;
-	xmlNode *root = nullptr;
-
+	std::string website = std::string("https://boards.4chan.org/") + std::string(board);
+	auto buffer = download_html(website.c_str());
 	auto result = convert_to_xmltree(buffer, &doc, &root);
 	if (!result) {
 		std::printf("Something went terribly wrong.\n");
 		exit(EXIT_FAILURE);
 	}
 
-	auto root_element = new xmlpp::Element(root);
+	 auto root_element = new xmlpp::Element(root);
 
-	//auto elements = root->find(XPATH_ALL_IMGS);
-	auto elements = root_element->find("//img/preceding::a[1]");
-	for (auto& element : elements) {
-		auto e = reinterpret_cast<xmlpp::Element *>(element);
-		std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
-	}
-	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
+	 //auto elements = root->find(XPATH_ALL_IMGS);
+	 auto elements = root_element->find("//img/preceding::a[1]");
+	 for (auto& element : elements) {
+		 auto e = reinterpret_cast<xmlpp::Element *>(element);
+		 std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
+	 }
+	 //auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
-	xmlNode *html_body = htmlparse_get_body(root);
+	 xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
 
 	xmlFreeDoc(doc);
