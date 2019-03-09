@@ -15,7 +15,7 @@
 #define XPATH_TITLE_AND_IMGS "//title | //a/img"
 
 namespace Constants {
-	const std::unordered_map<std::string, std::string> a{
+	const std::unordered_map<std::string, std::string> chan_map{
 			{"3",    "https://boards.4channel.org/3/"},
 			{"a",    "https://boards.4channel.org/a/"},
 			{"an",   "https://boards.4channel.org/an/"},
@@ -324,8 +324,8 @@ int main(int argc, char **argv)
 	}
 
 	std::string website;
-	auto mapsearch = Constants::a.find(board);
-	if (mapsearch == Constants::a.cend()) {
+	auto mapsearch = Constants::chan_map.find(board);
+	if (mapsearch == Constants::chan_map.cend()) {
 		std::printf("Invalid imageboard.\n");
 		exit(EXIT_FAILURE);
 	} else {
@@ -345,13 +345,20 @@ int main(int argc, char **argv)
 	 auto elements = root_element->find("//img/preceding::a[1]");
 	 for (auto& element : elements) {
 		 auto e = reinterpret_cast<xmlpp::Element *>(element);
-		 std::printf("Element tag: %s\n", e->get_attribute("href")->get_value().c_str());
+		 auto attr = e->get_attribute("href");
+		 std::printf("Element tag: %s\n", attr->get_value().c_str());
+		 delete attr;
 	 }
 	 //auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	 xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
 
+	for (auto& element : elements) {
+		delete element;
+	}
+	delete root_element;
 	xmlFreeDoc(doc);
+
 	return EXIT_SUCCESS;
 }
