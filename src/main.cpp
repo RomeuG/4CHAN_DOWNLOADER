@@ -193,9 +193,11 @@ bool convert_to_xmltree(std::string buffer, htmlDocPtr *document, xmlNode **root
 	return true;
 }
 
-bool download_img(const char *url)
+bool download_img(Glib::ustring& url)
 {
 	auto file_name = split_str(url, '/').back();
+	auto file_type = split_str(url, '.').back();
+
 	auto fp = std::fopen(file_name.c_str(), "wb");
 
 	if (url[0] == '/' && url[1] == '/') {
@@ -209,14 +211,14 @@ bool download_img(const char *url)
 
 	auto curl_ctx = curl_easy_init();
 
-	curl_easy_setopt(curl_ctx, CURLOPT_URL, url);
+	curl_easy_setopt(curl_ctx, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl_ctx, CURLOPT_WRITEDATA, fp);
 	curl_easy_setopt(curl_ctx, CURLOPT_WRITEFUNCTION, curlcb_img);
 	curl_easy_setopt(curl_ctx, CURLOPT_FOLLOWLOCATION, 1);
 
 	CURLcode rc = curl_easy_perform(curl_ctx);
 	if (rc) {
-		std::printf("Failed to download: %s\n", url);
+		std::printf("Failed to download: %s\n", url.c_str());
 		return false;
 	}
 
@@ -234,10 +236,55 @@ bool download_img(const char *url)
 	return true;
 }
 
+bool download_img_thumb(Glib::ustring& url)
+{
+	auto file_name = split_str(url, '/').back();
+	auto file_type = split_str(url, '.').back();
+
+	auto fp = std::fopen(file_name.c_str(), "wb");
+
+	if (url[0] == '/' && url[1] == '/') {
+		url.erase(0, 2);
+	}
+
+	if (!fp) {
+		std::printf("Failed to create file on the disk\n");
+		return false;
+	}
+
+	auto curl_ctx = curl_easy_init();
+
+	curl_easy_setopt(curl_ctx, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl_ctx, CURLOPT_WRITEDATA, fp);
+	curl_easy_setopt(curl_ctx, CURLOPT_WRITEFUNCTION, curlcb_img);
+	curl_easy_setopt(curl_ctx, CURLOPT_FOLLOWLOCATION, 1);
+
+	CURLcode rc = curl_easy_perform(curl_ctx);
+	if (rc) {
+		std::printf("Failed to download: %s\n", url.c_str());
+		return false;
+	}
+
+	auto res_code = 0;
+	curl_easy_getinfo(curl_ctx, CURLINFO_RESPONSE_CODE, &res_code);
+
+	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
+		std::printf("Response code: %d\n", res_code);
+		return false;
+	}
+
+	curl_easy_cleanup(curl_ctx);
+	std::fclose(fp);
+
+	return true;
+}
+
+// TODO receive NODE* as input instead of string
 void download_imgs(std::vector<std::string>& list)
 {
 	for (std::string& url : list) {
-		auto res = download_img(url.c_str());
+		//auto res = download_img(url);
+		auto res = true;
 		if (!res) {
 			std::printf("Error downloading image from %s\n", url.c_str());
 		}
@@ -346,14 +393,17 @@ int main(int argc, char **argv)
 
 	 auto root_element = new xmlpp::Element(root);
 
-	auto elements = root_element->find(XPATH_A_BEFORE_IMG);
+	auto elements = root_element->find(XPATH_IMG_THUMB);
 	 for (auto& element : elements) {
 		 auto e = reinterpret_cast<xmlpp::Element *>(element);
-		 auto attr = e->get_attribute("href");
+		 auto attr = e->get_attribute("src");
+		 Glib::ustring eh = attr->get_value();
+		 download_img(eh);
 		 std::printf("Element tag: %s\n", attr->get_value().c_str());
 		 delete attr;
 	 }
-	 //auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
+
+	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	 xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
