@@ -156,8 +156,6 @@ std::string download_html(const char *url)
 
 	code = curl_easy_perform(curl_ctx);
 
-	curl_slist_free_all(headers);
-
 	if (code != CURLE_OK) {
 		std::printf("Failed to get '%s' [%s]\n", url, curl_error_buffer);
 		exit(EXIT_FAILURE);
@@ -171,7 +169,9 @@ std::string download_html(const char *url)
 		return nullptr;
 	}
 
+	curl_slist_free_all(headers);
 	curl_easy_cleanup(curl_ctx);
+
 	return buffer;
 }
 
