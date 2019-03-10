@@ -198,6 +198,10 @@ bool download_img(const char *url)
 	auto file_name = split_str(url, '/').back();
 	auto fp = std::fopen(file_name.c_str(), "wb");
 
+	if (url[0] == '/' && url[1] == '/') {
+		url.erase(0, 2);
+	}
+
 	if (!fp) {
 		std::printf("Failed to create file on the disk\n");
 		return false;
