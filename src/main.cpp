@@ -193,17 +193,23 @@ bool convert_to_xmltree(std::string buffer, htmlDocPtr *document, xmlNode **root
 	return true;
 }
 
-bool download_img(Glib::ustring& url)
+bool download_img(Glib::ustring& _url)
 {
-	auto file_name = split_str(url, '/').back();
-	auto file_type = split_str(url, '.').back();
-
-	auto fp = std::fopen(file_name.c_str(), "wb");
+	auto url = std::string(_url);
 
 	if (url[0] == '/' && url[1] == '/') {
 		url.erase(0, 2);
 	}
 
+	auto s = url.find_last_of('s');
+	if (s != std::string::npos) {
+		url.erase(url.begin() + s);
+	}
+
+	auto file_name = split_str(url, '/').back();
+	auto file_type = split_str(url, '.').back();
+
+	auto fp = std::fopen(file_name.c_str(), "wb");
 	if (!fp) {
 		std::printf("Failed to create file on the disk\n");
 		return false;
@@ -225,8 +231,19 @@ bool download_img(Glib::ustring& url)
 	auto res_code = 0;
 	curl_easy_getinfo(curl_ctx, CURLINFO_RESPONSE_CODE, &res_code);
 
-	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
+	if (!((res_code == 200 || res_code == 201))) {
 		std::printf("Response code: %d\n", res_code);
+
+		if (file_type != "gif" && file_type == "jpg") {
+			std::printf("Trying to fetch the png...\n");
+
+			auto period = url.find_last_of('.');
+			url.replace(period + 1, url.size() - 1, "png");
+
+			Glib::ustring new_url = Glib::ustring(url);
+			download_img(new_url);
+		}
+
 		return false;
 	}
 
@@ -355,23 +372,20 @@ int main(int argc, char **argv)
 
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-		case 'b':
-			board = optarg;
-			break;
-		case 'c':
-			// TODO: download catalog with first post information
-			break;
-		case 'h':
-			// TODO
-			std::printf("Usage: ./program etc");
-			break;
-		case 'p':
-			index_page = optarg;
-			break;
-		case 't':
-			thread = optarg;
-			break;
-		default: break;
+			case 'b': board = optarg;
+				break;
+			case 'c':
+				// TODO: download catalog with first post information
+				break;
+			case 'h':
+				// TODO
+				std::printf("Usage: ./program etc");
+				break;
+			case 'p': index_page = optarg;
+				break;
+			case 't': thread = optarg;
+				break;
+			default: break;
 		}
 	}
 
@@ -391,21 +405,21 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	 auto root_element = new xmlpp::Element(root);
+	auto root_element = new xmlpp::Element(root);
 
 	auto elements = root_element->find(XPATH_IMG_THUMB);
-	 for (auto& element : elements) {
-		 auto e = reinterpret_cast<xmlpp::Element *>(element);
-		 auto attr = e->get_attribute("src");
-		 Glib::ustring eh = attr->get_value();
-		 download_img(eh);
-		 std::printf("Element tag: %s\n", attr->get_value().c_str());
-		 delete attr;
-	 }
+	for (auto& element : elements) {
+		auto e = reinterpret_cast<xmlpp::Element *>(element);
+		auto attr = e->get_attribute("src");
+		Glib::ustring eh = attr->get_value();
+		download_img(eh);
+		//std::printf("Element tag: %s\n", attr->get_value().c_str());
+		delete attr;
+	}
 
 	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
-	 xmlNode *html_body = htmlparse_get_body(root);
+	xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
 
 	for (auto& element : elements) {
