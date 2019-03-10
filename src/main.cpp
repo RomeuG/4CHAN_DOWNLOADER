@@ -13,6 +13,7 @@
 #define XPATH_IMG_THUMB "//a/img"
 #define XPATH_A_CLASS_THUMB "//a[@class='fileThumb']"
 #define XPATH_TITLE_AND_IMGS "//title | //a/img"
+#define XPATH_A_BEFORE_IMG "//img/preceding::a[1]"
 
 namespace Constants {
 	const std::unordered_map<std::string, std::string> chan_map{
@@ -127,7 +128,7 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 std::string download_html(const char *url)
 {
-	CURL *conn = nullptr;
+	CURL *curl_ctx = nullptr;
 	CURLcode code;
 
 	struct curl_slist *headers = nullptr;
@@ -137,25 +138,24 @@ std::string download_html(const char *url)
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
-	conn = curl_easy_init();
+	curl_ctx = curl_easy_init();
 
-	if (conn == nullptr) {
+	if (curl_ctx == nullptr) {
 		std::printf("Failed to create CURL connection\n");
 		return nullptr;
 	}
 
 	headers = curl_slist_append(headers, "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3724.8 Safari/537.36");
 
-	curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, curl_error_buffer);
-	curl_easy_setopt(conn, CURLOPT_URL, url);
-	curl_easy_setopt(conn, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 0L);
-	curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, curlcb_html);
-	curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
+	curl_easy_setopt(curl_ctx, CURLOPT_ERRORBUFFER, curl_error_buffer);
+	curl_easy_setopt(curl_ctx, CURLOPT_URL, url);
+	curl_easy_setopt(curl_ctx, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl_ctx, CURLOPT_FOLLOWLOCATION, 0L);
+	curl_easy_setopt(curl_ctx, CURLOPT_WRITEFUNCTION, curlcb_html);
+	curl_easy_setopt(curl_ctx, CURLOPT_WRITEDATA, &buffer);
 
-	code = curl_easy_perform(conn);
+	code = curl_easy_perform(curl_ctx);
 
-	curl_easy_cleanup(conn);
 	curl_slist_free_all(headers);
 
 	if (code != CURLE_OK) {
@@ -164,13 +164,14 @@ std::string download_html(const char *url)
 	}
 
 	auto res_code = 0;
-	curl_easy_getinfo(conn, CURLINFO_RESPONSE_CODE, &res_code);
+	curl_easy_getinfo(curl_ctx, CURLINFO_RESPONSE_CODE, &res_code);
 
 	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
 		std::printf("Response code: %d\n", res_code);
 		return nullptr;
 	}
 
+	curl_easy_cleanup(curl_ctx);
 	return buffer;
 }
 
@@ -341,8 +342,7 @@ int main(int argc, char **argv)
 
 	 auto root_element = new xmlpp::Element(root);
 
-	 //auto elements = root->find(XPATH_ALL_IMGS);
-	 auto elements = root_element->find("//img/preceding::a[1]");
+	auto elements = root_element->find(XPATH_A_BEFORE_IMG);
 	 for (auto& element : elements) {
 		 auto e = reinterpret_cast<xmlpp::Element *>(element);
 		 auto attr = e->get_attribute("href");
