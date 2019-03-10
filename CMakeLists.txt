@@ -15,8 +15,11 @@ include_directories(/usr/lib/glibmm-2.4/include)
 include_directories(/usr/include/glib-2.0)
 include_directories(/usr/lib/glib-2.0/include)
 
+set(LIBSTDCXX_FS_LIBRARIES -lstdc++fs)
 set(CMAKE_CXX_FLAGS " -ggdb3 -O0 -lxml++-3.0 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lglib-2.0 -lsigc-2.0 -lcurl")
 
 add_executable(4CHAN_DOWNLOADER
         src/main.cpp
         README.md)
+
+target_link_libraries(4CHAN_DOWNLOADER ${LIBSTDCXX_FS_LIBRARIES})

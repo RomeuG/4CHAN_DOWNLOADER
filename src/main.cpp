@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <filesystem>
 
 #include <libxml++-3.0/libxml++/libxml++.h>
 #include <libxml2/libxml/HTMLparser.h>
@@ -193,6 +194,11 @@ bool convert_to_xmltree(std::string buffer, htmlDocPtr *document, xmlNode **root
 	return true;
 }
 
+bool remove_file(std::string& path)
+{
+	return std::filesystem::remove(path);
+}
+
 bool download_img(Glib::ustring& _url)
 {
 	auto url = std::string(_url);
@@ -225,6 +231,8 @@ bool download_img(Glib::ustring& _url)
 	CURLcode rc = curl_easy_perform(curl_ctx);
 	if (rc) {
 		std::printf("Failed to download: %s\n", url.c_str());
+
+		std::fclose(fp);
 		return false;
 	}
 
@@ -234,15 +242,25 @@ bool download_img(Glib::ustring& _url)
 	if (!((res_code == 200 || res_code == 201))) {
 		std::printf("Response code: %d\n", res_code);
 
+		curl_easy_cleanup(curl_ctx);
+		std::fclose(fp);
+
 		if (file_type != "gif" && file_type == "jpg") {
 			std::printf("Trying to fetch the png...\n");
 
+			// delete version of file that is not downloadable
+			remove_file(file_name);
+
+			// change url from jpg to png
 			auto period = url.find_last_of('.');
 			url.replace(period + 1, url.size() - 1, "png");
 
 			Glib::ustring new_url = Glib::ustring(url);
 			download_img(new_url);
 		}
+
+		// delete if the file ultimately isnt downloadble
+		remove_file(file_name);
 
 		return false;
 	}
