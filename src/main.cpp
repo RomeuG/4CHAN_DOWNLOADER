@@ -437,8 +437,8 @@ int main(int argc, char **argv)
 		auto e = reinterpret_cast<xmlpp::Element *>(element);
 		auto attr = e->get_attribute("src");
 		Glib::ustring eh = attr->get_value();
-		download_img(eh);
-		//std::printf("Element tag: %s\n", attr->get_value().c_str());
+		//download_img(eh);
+		std::printf("Element tag: %s\n", attr->get_value().c_str());
 		delete attr;
 	}
 
