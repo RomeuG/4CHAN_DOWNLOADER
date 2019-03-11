@@ -203,10 +203,12 @@ bool download_img(Glib::ustring& _url)
 {
 	auto url = std::string(_url);
 
+	// erase leading //
 	if (url[0] == '/' && url[1] == '/') {
 		url.erase(0, 2);
 	}
 
+	// get url for the original sized image
 	auto s = url.find_last_of('s');
 	if (s != std::string::npos) {
 		url.erase(url.begin() + s);
@@ -278,6 +280,7 @@ bool download_img_thumb(Glib::ustring& url)
 
 	auto fp = std::fopen(file_name.c_str(), "wb");
 
+	// erase leading //
 	if (url[0] == '/' && url[1] == '/') {
 		url.erase(0, 2);
 	}
@@ -381,9 +384,9 @@ int main(int argc, char **argv)
 {
 	int copts;
 
-	std::string board;
-	std::string thread;
-	std::string index_page;
+	std::string board = "";
+	std::string thread = "";
+	std::string index_page = "";
 
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
@@ -414,6 +417,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	} else {
 		website = mapsearch->second;
+	}
+
+	if (thread != "") {
+		website = website + "thread/" + thread;
 	}
 
 	auto buffer = download_html(website.c_str());
