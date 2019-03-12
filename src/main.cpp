@@ -384,43 +384,43 @@ int main(int argc, char **argv)
 {
 	int copts;
 
-	std::string board = "";
-	std::string thread = "";
-	std::string index_page = "";
+	std::string arg_board = "";
+	std::string arg_thread = "";
+	std::string arg_page = "";
 
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
 
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-			case 'b': board = optarg;
-				break;
-			case 'c':
-				// TODO: download catalog with first post information
-				break;
-			case 'h':
-				// TODO
-				std::printf("Usage: ./program etc");
-				break;
-			case 'p': index_page = optarg;
-				break;
-			case 't': thread = optarg;
-				break;
-			default: break;
+		case 'b': arg_board = optarg;
+			break;
+		case 'c':
+			// TODO: download catalog with first post information
+			break;
+		case 'h':
+			// TODO
+			std::printf("Usage: ./program etc");
+			break;
+		case 'p': arg_page = optarg;
+			break;
+		case 't': arg_thread = optarg;
+			break;
+		default: break;
 		}
 	}
 
 	std::string website;
-	auto mapsearch = Constants::chan_map.find(board);
-	if (mapsearch == Constants::chan_map.cend()) {
+	auto board = Constants::chan_map.find(arg_board);
+	if (board == Constants::chan_map.cend()) {
 		std::printf("Invalid imageboard.\n");
 		exit(EXIT_FAILURE);
 	} else {
-		website = mapsearch->second;
+		website = board->second;
 	}
 
-	if (thread != "") {
-		website = website + "thread/" + thread;
+	if (arg_thread != "") {
+		website = website + "thread/" + arg_thread;
 	}
 
 	auto buffer = download_html(website.c_str());
