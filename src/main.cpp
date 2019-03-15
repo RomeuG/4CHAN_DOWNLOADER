@@ -16,6 +16,9 @@
 #define XPATH_TITLE_AND_IMGS "//title | //a/img"
 #define XPATH_A_BEFORE_IMG "//img/preceding::a[1]"
 
+#define XPATH_OP_POST "//div[@class='post op']"
+#define XPATH_REPLY_POST "//div[@class='post reply']"
+
 namespace Constants {
 	const std::unordered_map<std::string, std::string> chan_map{
 			{"3",    "https://boards.4channel.org/3/"},
@@ -319,7 +322,7 @@ bool download_img_thumb(Glib::ustring& url)
 
 // TODO receive NODE* as input instead of string
 void download_imgs(std::vector<std::string>& list)
-{
+yy{
 	for (std::string& url : list) {
 		//auto res = download_img(url);
 		auto res = true;
@@ -380,6 +383,18 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 	return node_info;
 }
 
+void get_thread(xmlpp::Element *root)
+{
+	auto op = root->find(XPATH_OP_POST);
+	auto replies = root->find(XPATH_REPLY_POST);
+	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
+		auto e = reinterpret_cast<xmlpp::Element *>(element);
+		auto attr = e->get_attribute("id");
+		Glib::ustring eh = attr->get_value();
+		std::printf("Attr value: %s\n", eh.c_str());
+	});
+}
+
 int main(int argc, char **argv)
 {
 	int copts;
@@ -431,25 +446,27 @@ int main(int argc, char **argv)
 	}
 
 	auto root_element = new xmlpp::Element(root);
+	get_thread(root_element);
 
-	auto elements = root_element->find(XPATH_IMG_THUMB);
-	for (auto& element : elements) {
-		auto e = reinterpret_cast<xmlpp::Element *>(element);
-		auto attr = e->get_attribute("src");
-		Glib::ustring eh = attr->get_value();
-		//download_img(eh);
-		std::printf("Element tag: %s\n", attr->get_value().c_str());
-		delete attr;
-	}
+	// auto elements = root_element->find(XPATH_IMG_THUMB);
+	// for (auto& element : elements) {
+	// 	auto e = reinterpret_cast<xmlpp::Element *>(element);
+	// 	auto attr = e->get_attribute("src");
+	// 	Glib::ustring eh = attr->get_value();
+	// 	//download_img(eh);
+	// 	std::printf("Element tag: %s\n", attr->get_value().c_str());
+	// 	delete attr;
+	// }
 
 	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
 
 	xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
 
-	for (auto& element : elements) {
-		delete element;
-	}
+	// for (auto& element : elements) {
+	// 	delete element;
+	// }
+
 	delete root_element;
 	xmlFreeDoc(doc);
 
