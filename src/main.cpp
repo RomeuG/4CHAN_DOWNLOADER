@@ -322,7 +322,7 @@ bool download_img_thumb(Glib::ustring& url)
 
 // TODO receive NODE* as input instead of string
 void download_imgs(std::vector<std::string>& list)
-yy{
+{
 	for (std::string& url : list) {
 		//auto res = download_img(url);
 		auto res = true;
