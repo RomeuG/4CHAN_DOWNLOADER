@@ -386,12 +386,22 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 void get_thread(xmlpp::Element *root)
 {
 	auto op = root->find(XPATH_OP_POST);
-	auto replies = root->find(XPATH_REPLY_POST);
+	//auto replies = root->find(XPATH_REPLY_POST);
+	auto replies = root->find("//blockquote[@class='postMessage']/text()[1]");
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto e = reinterpret_cast<xmlpp::Element *>(element);
-		auto attr = e->get_attribute("id");
-		Glib::ustring eh = attr->get_value();
-		std::printf("Attr value: %s\n", eh.c_str());
+		auto e = reinterpret_cast<xmlpp::TextNode *>(element);
+
+		std::printf("%s\n", e->get_content().c_str());
+
+		xmlpp::Node *sibling = e->get_next_sibling();
+		while (sibling) {
+			auto d = reinterpret_cast<xmlpp::TextNode *>(element);
+			std::printf("%s\n", d->get_content().c_str());
+
+			sibling = sibling->get_next_sibling();
+		}
+
+		std::putc('\n', stdout);
 	});
 }
 
@@ -408,20 +418,20 @@ int main(int argc, char **argv)
 
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-		case 'b': arg_board = optarg;
-			break;
-		case 'c':
-			// TODO: download catalog with first post information
-			break;
-		case 'h':
-			// TODO
-			std::printf("Usage: ./program etc");
-			break;
-		case 'p': arg_page = optarg;
-			break;
-		case 't': arg_thread = optarg;
-			break;
-		default: break;
+			case 'b': arg_board = optarg;
+				break;
+			case 'c':
+				// TODO: download catalog with first post information
+				break;
+			case 'h':
+				// TODO
+				std::printf("Usage: ./program etc");
+				break;
+			case 'p': arg_page = optarg;
+				break;
+			case 't': arg_thread = optarg;
+				break;
+			default: break;
 		}
 	}
 
