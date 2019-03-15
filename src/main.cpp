@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 		website = board->second;
 	}
 
-	if (arg_thread != "") {
+	if (!arg_thread.empty()) {
 		website = website + "thread/" + arg_thread;
 	}
 
