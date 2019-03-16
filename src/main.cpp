@@ -16,6 +16,8 @@
 #define XPATH_TITLE_AND_IMGS "//title | //a/img"
 #define XPATH_A_BEFORE_IMG "//img/preceding::a[1]"
 
+#define XPATH_BLOCKQUOTE_TEXT "//blockquote[@class='postMessage']/text()"
+
 #define XPATH_OP_POST "//div[@class='post op']"
 #define XPATH_REPLY_POST "//div[@class='post reply']"
 
@@ -387,15 +389,19 @@ void get_thread(xmlpp::Element *root)
 {
 	auto op = root->find(XPATH_OP_POST);
 	//auto replies = root->find(XPATH_REPLY_POST);
-	auto replies = root->find("//blockquote[@class='postMessage']/text()[1]");
+	//auto replies = root->find("//blockquote[@class='postMessage']/text()");
+	auto replies = root->find("//blockquote[@class='postMessage']");
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto e = reinterpret_cast<xmlpp::TextNode *>(element);
+		auto e = reinterpret_cast<xmlpp::Element *>(element);
 
-		std::printf("%s\n", e->get_content().c_str());
-
-		xmlpp::Node *sibling = e->get_next_sibling();
+		auto sibling = e->get_first_child();
 		while (sibling) {
-			auto d = reinterpret_cast<xmlpp::TextNode *>(element);
+			if (sibling->get_name() != "text") {
+				sibling = sibling->get_next_sibling();
+				continue;
+			}
+
+			auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
 			std::printf("%s\n", d->get_content().c_str());
 
 			sibling = sibling->get_next_sibling();
