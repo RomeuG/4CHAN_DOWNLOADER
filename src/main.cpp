@@ -21,6 +21,9 @@
 #define XPATH_OP_POST "//div[@class='post op']"
 #define XPATH_REPLY_POST "//div[@class='post reply']"
 
+//auto replies = root->find("//blockquote[@class='postMessage']/text()");
+//auto replies = root->find("//blockquote[@class='postMessage']");
+
 namespace Constants {
 	const std::unordered_map<std::string, std::string> chan_map{
 			{"3",    "https://boards.4channel.org/3/"},
@@ -388,26 +391,30 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 void get_thread(xmlpp::Element *root)
 {
 	auto op = root->find(XPATH_OP_POST);
-	//auto replies = root->find(XPATH_REPLY_POST);
-	//auto replies = root->find("//blockquote[@class='postMessage']/text()");
-	auto replies = root->find("//blockquote[@class='postMessage']");
+	auto replies = root->find(XPATH_REPLY_POST);
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto e = reinterpret_cast<xmlpp::Element *>(element);
+		auto a = reinterpret_cast<xmlpp::Element *>(element);
 
-		auto sibling = e->get_first_child();
-		while (sibling) {
-			if (sibling->get_name() != "text") {
+		// get text
+		// TODO: missing op post
+		{
+			auto e = reinterpret_cast<xmlpp::Element *>(a->get_children().back());
+
+			auto sibling = e->get_first_child();
+			while (sibling) {
+				if (sibling->get_name() != "text") {
+					sibling = sibling->get_next_sibling();
+					continue;
+				}
+
+				auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
+				std::printf("%s\n", d->get_content().c_str());
+
 				sibling = sibling->get_next_sibling();
-				continue;
 			}
 
-			auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
-			std::printf("%s\n", d->get_content().c_str());
-
-			sibling = sibling->get_next_sibling();
+			std::putc('\n', stdout);
 		}
-
-		std::putc('\n', stdout);
 	});
 }
 
@@ -464,24 +471,8 @@ int main(int argc, char **argv)
 	auto root_element = new xmlpp::Element(root);
 	get_thread(root_element);
 
-	// auto elements = root_element->find(XPATH_IMG_THUMB);
-	// for (auto& element : elements) {
-	// 	auto e = reinterpret_cast<xmlpp::Element *>(element);
-	// 	auto attr = e->get_attribute("src");
-	// 	Glib::ustring eh = attr->get_value();
-	// 	//download_img(eh);
-	// 	std::printf("Element tag: %s\n", attr->get_value().c_str());
-	// 	delete attr;
-	// }
-
-	//auto node_info = get_node_info<xmlpp::Element *>(elements[0]);
-
 	xmlNode *html_body = htmlparse_get_body(root);
 	//traverse_dom_trees(html_body);
-
-	// for (auto& element : elements) {
-	// 	delete element;
-	// }
 
 	delete root_element;
 	xmlFreeDoc(doc);
