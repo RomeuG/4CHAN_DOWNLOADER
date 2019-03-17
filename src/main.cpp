@@ -392,11 +392,35 @@ void get_thread(xmlpp::Element *root)
 {
 	auto op = root->find(XPATH_OP_POST);
 	auto replies = root->find(XPATH_REPLY_POST);
+
+	std::for_each(op.begin(), op.end(), [](xmlpp::Node *element) {
+		auto a = reinterpret_cast<xmlpp::Element *>(element);
+
+		// get text
+		{
+			auto e = reinterpret_cast<xmlpp::Element *>(a->get_children().back());
+
+			auto sibling = e->get_first_child();
+			while (sibling) {
+				if (sibling->get_name() != "text") {
+					sibling = sibling->get_next_sibling();
+					continue;
+				}
+
+				auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
+				std::printf("%s\n", d->get_content().c_str());
+
+				sibling = sibling->get_next_sibling();
+			}
+
+			std::putc('\n', stdout);
+		}
+	});
+
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
 		auto a = reinterpret_cast<xmlpp::Element *>(element);
 
 		// get text
-		// TODO: missing op post
 		{
 			auto e = reinterpret_cast<xmlpp::Element *>(a->get_children().back());
 
