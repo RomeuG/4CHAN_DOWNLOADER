@@ -388,11 +388,13 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 	return node_info;
 }
 
-void get_post_text(xmlpp::Element *element)
+std::string get_post_text(xmlpp::Element *element)
 {
-	auto e = reinterpret_cast<xmlpp::Element *>(element->get_children().back());
+	std::string post;
 
-	auto sibling = e->get_first_child();
+	auto blockquote = reinterpret_cast<xmlpp::Element *>(element->get_children().back());
+
+	auto sibling = blockquote->get_first_child();
 	while (sibling) {
 		if (sibling->get_name() != "text") {
 			sibling = sibling->get_next_sibling();
@@ -400,12 +402,12 @@ void get_post_text(xmlpp::Element *element)
 		}
 
 		auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
-		std::printf("%s\n", d->get_content().c_str());
+		post += d->get_content() + "\n";
 
 		sibling = sibling->get_next_sibling();
 	}
 
-	std::putc('\n', stdout);
+	return post;
 }
 
 void get_thread(xmlpp::Element *root)
@@ -414,13 +416,15 @@ void get_thread(xmlpp::Element *root)
 	auto replies = root->find(XPATH_REPLY_POST);
 
 	std::for_each(op.begin(), op.end(), [](xmlpp::Node *element) {
-		auto a = reinterpret_cast<xmlpp::Element *>(element);
-		get_post_text(a);
+		auto blockquote = reinterpret_cast<xmlpp::Element *>(element);
+		auto text = get_post_text(blockquote);
+		std::printf("%s\n", text.c_str());
 	});
 
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto a = reinterpret_cast<xmlpp::Element *>(element);
-		get_post_text(a);
+		auto blockquote = reinterpret_cast<xmlpp::Element *>(element);
+		auto text = get_post_text(blockquote);
+		std::printf("%s\n", text.c_str());
 	});
 }
 
@@ -428,9 +432,9 @@ int main(int argc, char **argv)
 {
 	int copts;
 
-	std::string arg_board = "";
-	std::string arg_thread = "";
-	std::string arg_page = "";
+	std::string arg_board;
+	std::string arg_thread;
+	std::string arg_page;
 
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
