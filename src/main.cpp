@@ -388,6 +388,26 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 	return node_info;
 }
 
+void get_post_text(xmlpp::Element *element)
+{
+	auto e = reinterpret_cast<xmlpp::Element *>(element->get_children().back());
+
+	auto sibling = e->get_first_child();
+	while (sibling) {
+		if (sibling->get_name() != "text") {
+			sibling = sibling->get_next_sibling();
+			continue;
+		}
+
+		auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
+		std::printf("%s\n", d->get_content().c_str());
+
+		sibling = sibling->get_next_sibling();
+	}
+
+	std::putc('\n', stdout);
+}
+
 void get_thread(xmlpp::Element *root)
 {
 	auto op = root->find(XPATH_OP_POST);
@@ -395,50 +415,12 @@ void get_thread(xmlpp::Element *root)
 
 	std::for_each(op.begin(), op.end(), [](xmlpp::Node *element) {
 		auto a = reinterpret_cast<xmlpp::Element *>(element);
-
-		// get text
-		{
-			auto e = reinterpret_cast<xmlpp::Element *>(a->get_children().back());
-
-			auto sibling = e->get_first_child();
-			while (sibling) {
-				if (sibling->get_name() != "text") {
-					sibling = sibling->get_next_sibling();
-					continue;
-				}
-
-				auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
-				std::printf("%s\n", d->get_content().c_str());
-
-				sibling = sibling->get_next_sibling();
-			}
-
-			std::putc('\n', stdout);
-		}
+		get_post_text(a);
 	});
 
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
 		auto a = reinterpret_cast<xmlpp::Element *>(element);
-
-		// get text
-		{
-			auto e = reinterpret_cast<xmlpp::Element *>(a->get_children().back());
-
-			auto sibling = e->get_first_child();
-			while (sibling) {
-				if (sibling->get_name() != "text") {
-					sibling = sibling->get_next_sibling();
-					continue;
-				}
-
-				auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
-				std::printf("%s\n", d->get_content().c_str());
-
-				sibling = sibling->get_next_sibling();
-			}
-
-			std::putc('\n', stdout);
-		}
+		get_post_text(a);
 	});
 }
 
