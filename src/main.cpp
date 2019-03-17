@@ -388,6 +388,16 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 	return node_info;
 }
 
+std::string get_post_header(xmlpp::Element *element)
+{
+	std::string header;
+
+	auto a = std::next(element->get_children().begin(), 1);
+	auto xml_header = reinterpret_cast<xmlpp::Element *>(*a);
+
+	return header;
+}
+
 std::string get_post_text(xmlpp::Element *element)
 {
 	std::string post;
@@ -416,14 +426,18 @@ void get_thread(xmlpp::Element *root)
 	auto replies = root->find(XPATH_REPLY_POST);
 
 	std::for_each(op.begin(), op.end(), [](xmlpp::Node *element) {
-		auto blockquote = reinterpret_cast<xmlpp::Element *>(element);
-		auto text = get_post_text(blockquote);
+		auto post = reinterpret_cast<xmlpp::Element *>(element);
+
+		auto header = get_post_header(post);
+		auto text = get_post_text(post);
 		std::printf("%s\n", text.c_str());
 	});
 
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto blockquote = reinterpret_cast<xmlpp::Element *>(element);
-		auto text = get_post_text(blockquote);
+		auto post = reinterpret_cast<xmlpp::Element *>(element);
+
+		auto header = get_post_header(post);
+		auto text = get_post_text(post);
 		std::printf("%s\n", text.c_str());
 	});
 }
