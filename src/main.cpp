@@ -395,6 +395,20 @@ std::string get_post_header(xmlpp::Element *element)
 	auto a = std::next(element->get_children().begin(), 1);
 	auto xml_header = reinterpret_cast<xmlpp::Element *>(*a);
 
+	auto header_children = xml_header->get_children();
+
+	a = std::next(header_children.begin(), 1);
+	auto name_xml = reinterpret_cast<xmlpp::Element *>(*a);
+	std::printf("name_xml: %s\n", name_xml->get_name().c_str());
+
+	a = std::next(header_children.begin(), 1);
+	auto date_xml = reinterpret_cast<xmlpp::Element *>(*a);
+	std::printf("date_xml: %s\n", date_xml->get_name().c_str());
+
+	a = std::next(header_children.begin(), 1);
+	auto number_xml = reinterpret_cast<xmlpp::Element *>(*a);
+	std::printf("number_xml: %s\n", number_xml->get_name().c_str());
+
 	return header;
 }
 
