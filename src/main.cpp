@@ -388,9 +388,24 @@ std::array<std::string, 3> get_node_info(xmlpp::Node *node)
 	return node_info;
 }
 
+xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
+{
+	auto children = element->get_children();
+	for (xmlpp::Node* &child : children) {
+		auto e = reinterpret_cast<xmlpp::Element*>(child);
+		std::printf("class=%s\n", e->get_attribute("class")->get_value().c_str());
+		if (e->get_attribute("class")->get_value() == "postInfo desktop") {
+			return e;
+		}
+	}
+
+	return nullptr;
+}
+
 std::string get_post_header(xmlpp::Element *element)
 {
 	std::string header;
+	get_post_header_ptr(element);
 
 	auto a = std::next(element->get_children().begin(), 1);
 	auto xml_header = reinterpret_cast<xmlpp::Element *>(*a);
@@ -403,7 +418,8 @@ std::string get_post_header(xmlpp::Element *element)
 
 	a = std::next(header_children.begin(), 1);
 	auto date_xml = reinterpret_cast<xmlpp::Element *>(*a);
-	std::printf("date_xml: %s\n", date_xml->get_name().c_str());
+	auto date = reinterpret_cast<xmlpp::TextNode *>(date_xml->get_first_child());
+	std::printf("date_xml: %s\n", date->get_content().c_str());
 
 	a = std::next(header_children.begin(), 1);
 	auto number_xml = reinterpret_cast<xmlpp::Element *>(*a);
