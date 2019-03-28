@@ -407,17 +407,17 @@ std::string get_post_header(xmlpp::Element *element)
 	auto header_element = get_post_header_ptr(element);
 	auto header_children = header_element->get_children();
 
-	std::for_each(header_children.begin(), header_children.end(), [](xmlpp::Node *child) {
+	std::for_each(header_children.begin(), header_children.end(), [&header](xmlpp::Node *child) {
 		auto child_element = reinterpret_cast<xmlpp::Element*>(child);
 
 		if (child_element->get_attribute_value("class") == "subject") {
 			auto subject_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
-			std::printf("Subject: %s\n", subject_element->get_content().c_str());
+			header += subject_element->get_content() + " ";
 		}
 
 		if (child_element->get_attribute_value("class") == "dateTime") {
 			auto datetime_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
-			std::printf("Date Time: %s\n", datetime_element->get_content().c_str());
+			header += datetime_element->get_content() + " ";
 		}
 
 		if (child_element->get_attribute_value("class") == "postNum desktop") {
@@ -427,7 +427,7 @@ std::string get_post_header(xmlpp::Element *element)
 			auto postnum_element = reinterpret_cast<xmlpp::Element*>(*postnum_child);
 			auto postnum = reinterpret_cast<xmlpp::TextNode*>(postnum_element->get_first_child());
 
-			std::printf("Post number: %s\n", postnum->get_content().c_str());
+			header += postnum->get_content();
 		}
 	});
 
@@ -466,6 +466,7 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
+		std::printf("Header: %s\n", header.c_str());
 		std::printf("Text: %s\n", text.c_str());
 	});
 
@@ -474,6 +475,7 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
+		std::printf("Header: %s\n", header.c_str());
 		std::printf("Text: %s\n", text.c_str());
 	});
 }
