@@ -450,16 +450,36 @@ std::string get_post_text(xmlpp::Element *element)
 
 	auto sibling = blockquote->get_first_child();
 	while (sibling) {
-		if (sibling->get_name() != "text") {
-			sibling = sibling->get_next_sibling();
-			continue;
+		if (sibling->get_name() == "br") {
+			post += "\n";
 		}
 
-		auto d = reinterpret_cast<xmlpp::TextNode *>(sibling);
-		post += d->get_content() + "\n";
+		if (sibling->get_name() == "text") {
+			auto text = reinterpret_cast<xmlpp::TextNode *>(sibling);
+			if (text) {
+				post += text->get_content();
+			}
+		}
+
+		if (sibling->get_name() == "a") {
+			auto link_text = reinterpret_cast<xmlpp::TextNode*>(sibling->get_first_child());
+			if (link_text) {
+				post += link_text->get_content();
+			}
+		}
+
+		if (sibling->get_name() == "span") {
+			auto quote = reinterpret_cast<xmlpp::TextNode*>(sibling->get_first_child());
+			if (quote) {
+				post += quote->get_content();
+			}
+		}
 
 		sibling = sibling->get_next_sibling();
 	}
+
+	// two new lines to separate posts
+	post += "\n\n";
 
 	return post;
 }
@@ -474,8 +494,8 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
-		std::printf("Header: %s\n", header.c_str());
-		std::printf("Text: %s\n", text.c_str());
+		std::printf("%s\n", header.c_str());
+		std::printf("%s\n", text.c_str());
 	});
 
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
@@ -483,8 +503,8 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
-		std::printf("Header: %s\n", header.c_str());
-		std::printf("Text: %s\n", text.c_str());
+		std::printf("%s\n", header.c_str());
+		std::printf("%s\n", text.c_str());
 	});
 }
 
