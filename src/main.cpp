@@ -405,25 +405,17 @@ xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
 std::string get_post_header(xmlpp::Element *element)
 {
 	std::string header;
-	get_post_header_ptr(element);
+	auto header_element = get_post_header_ptr(element);
+	auto header_children = header_element->get_children();
 
-	auto a = std::next(element->get_children().begin(), 1);
-	auto xml_header = reinterpret_cast<xmlpp::Element *>(*a);
+	std::for_each(header_children.begin(), header_children.end(), [](xmlpp::Node *child) {
+		auto child_element = reinterpret_cast<xmlpp::Element*>(child);
 
-	auto header_children = xml_header->get_children();
-
-	a = std::next(header_children.begin(), 1);
-	auto name_xml = reinterpret_cast<xmlpp::Element *>(*a);
-	std::printf("name_xml: %s\n", name_xml->get_name().c_str());
-
-	a = std::next(header_children.begin(), 1);
-	auto date_xml = reinterpret_cast<xmlpp::Element *>(*a);
-	auto date = reinterpret_cast<xmlpp::TextNode *>(date_xml->get_first_child());
-	std::printf("date_xml: %s\n", date->get_content().c_str());
-
-	a = std::next(header_children.begin(), 1);
-	auto number_xml = reinterpret_cast<xmlpp::Element *>(*a);
-	std::printf("number_xml: %s\n", number_xml->get_name().c_str());
+		if (child_element->get_attribute_value("class") == "subject") {
+			auto subject_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
+			std::printf("Subject: %s\n", subject_element->get_content().c_str());
+		}
+	});
 
 	return header;
 }
