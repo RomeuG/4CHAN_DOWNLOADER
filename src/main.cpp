@@ -393,7 +393,6 @@ xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
 	auto children = element->get_children();
 	for (xmlpp::Node* &child : children) {
 		auto e = reinterpret_cast<xmlpp::Element*>(child);
-		std::printf("class=%s\n", e->get_attribute("class")->get_value().c_str());
 		if (e->get_attribute("class")->get_value() == "postInfo desktop") {
 			return e;
 		}
@@ -414,6 +413,11 @@ std::string get_post_header(xmlpp::Element *element)
 		if (child_element->get_attribute_value("class") == "subject") {
 			auto subject_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
 			std::printf("Subject: %s\n", subject_element->get_content().c_str());
+		}
+
+		if (child_element->get_attribute_value("class") == "dateTime") {
+			auto datetime_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
+			std::printf("Date Time: %s\n", datetime_element->get_content().c_str());
 		}
 	});
 
@@ -452,7 +456,7 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
-		std::printf("%s\n", text.c_str());
+		std::printf("Text: %s\n", text.c_str());
 	});
 
 	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
@@ -460,7 +464,7 @@ void get_thread(xmlpp::Element *root)
 
 		auto header = get_post_header(post);
 		auto text = get_post_text(post);
-		std::printf("%s\n", text.c_str());
+		std::printf("Text: %s\n", text.c_str());
 	});
 }
 
