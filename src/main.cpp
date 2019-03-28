@@ -419,6 +419,16 @@ std::string get_post_header(xmlpp::Element *element)
 			auto datetime_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
 			std::printf("Date Time: %s\n", datetime_element->get_content().c_str());
 		}
+
+		if (child_element->get_attribute_value("class") == "postNum desktop") {
+			auto postnum_children = child_element->get_children();
+			auto postnum_child = std::next(postnum_children.begin(), 1);
+
+			auto postnum_element = reinterpret_cast<xmlpp::Element*>(*postnum_child);
+			auto postnum = reinterpret_cast<xmlpp::TextNode*>(postnum_element->get_first_child());
+
+			std::printf("Post number: %s\n", postnum->get_content().c_str());
+		}
 	});
 
 	return header;
