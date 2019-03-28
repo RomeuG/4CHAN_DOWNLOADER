@@ -412,12 +412,18 @@ std::string get_post_header(xmlpp::Element *element)
 
 		if (child_element->get_attribute_value("class") == "subject") {
 			auto subject_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
-			header += subject_element->get_content() + " ";
+
+			if (subject_element) {
+				header += subject_element->get_content() + " ";
+			}
 		}
 
 		if (child_element->get_attribute_value("class") == "dateTime") {
 			auto datetime_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
-			header += datetime_element->get_content() + " ";
+
+			if (datetime_element) {
+				header += datetime_element->get_content() + " ";
+			}
 		}
 
 		if (child_element->get_attribute_value("class") == "postNum desktop") {
@@ -427,7 +433,9 @@ std::string get_post_header(xmlpp::Element *element)
 			auto postnum_element = reinterpret_cast<xmlpp::Element*>(*postnum_child);
 			auto postnum = reinterpret_cast<xmlpp::TextNode*>(postnum_element->get_first_child());
 
-			header += postnum->get_content();
+			if (postnum) {
+				header += postnum->get_content();
+			}
 		}
 	});
 
