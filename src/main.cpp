@@ -401,6 +401,20 @@ xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
 	return nullptr;
 }
 
+xmlpp::Element* get_post_file_ptr(xmlpp::Element *element)
+{
+	auto children = element->get_children();
+	for (xmlpp::Node* &child : children) {
+		auto e = reinterpret_cast<xmlpp::Element*>(child);
+		if (e->get_attribute_value("class") == "file") {
+			auto fileText_element = e->get_children().front();
+			return reinterpret_cast<xmlpp::Element*>(fileText_element);
+		}
+	}
+
+	return nullptr;
+}
+
 std::string get_post_header(xmlpp::Element *element)
 {
 	std::string header;
@@ -440,6 +454,48 @@ std::string get_post_header(xmlpp::Element *element)
 	});
 
 	return header;
+}
+
+std::string get_post_file(xmlpp::Element *element) {
+	std::string file;
+	std::string file_link;
+
+	auto file_element = get_post_file_ptr(element);
+	if (!file_element) {
+		return file;
+	}
+
+	auto file_children = file_element->get_children();
+	if (file_children.size() == 0) {
+		return file;
+	}
+
+	std::for_each(file_children.begin(), file_children.end(), [&file, &file_link](xmlpp::Node *child) {
+		if (child->get_name() == "text") {
+			auto text_element = reinterpret_cast<xmlpp::TextNode*>(child);
+			if (text_element) {
+				file += text_element->get_content();
+			}
+		}
+
+		if (child->get_name() == "a") {
+			auto link_element = reinterpret_cast<xmlpp::Element*>(child);
+			auto link_text = reinterpret_cast<xmlpp::TextNode*>(child->get_first_child());
+
+			file_link = link_element->get_attribute_value("href");
+
+			if (link_text) {
+				file += link_text->get_content();
+			}
+		}
+	});
+
+	// add final part (link)
+	if (file_link.length() > 0) {
+		file += " https:" + file_link;
+	}
+
+	return file;
 }
 
 std::string get_post_text(xmlpp::Element *element)
@@ -493,8 +549,15 @@ void get_thread(xmlpp::Element *root)
 		auto post = reinterpret_cast<xmlpp::Element *>(element);
 
 		auto header = get_post_header(post);
+		auto file = get_post_file(post);
 		auto text = get_post_text(post);
+
 		std::printf("%s\n", header.c_str());
+
+		if (!file.empty()) {
+			std::printf("%s\n", file.c_str());
+		}
+
 		std::printf("%s\n", text.c_str());
 	});
 
@@ -502,8 +565,15 @@ void get_thread(xmlpp::Element *root)
 		auto post = reinterpret_cast<xmlpp::Element *>(element);
 
 		auto header = get_post_header(post);
+		auto file = get_post_file(post);
 		auto text = get_post_text(post);
+
 		std::printf("%s\n", header.c_str());
+
+		if (!file.empty()) {
+			std::printf("%s\n", file.c_str());
+		}
+
 		std::printf("%s\n", text.c_str());
 	});
 }
