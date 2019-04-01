@@ -609,6 +609,7 @@ int main(int argc, char **argv)
 	int copts;
 
 	std::string arg_board;
+	std::string arg_catalogue;
 	std::string arg_thread;
 	std::string arg_page;
 
@@ -617,20 +618,21 @@ int main(int argc, char **argv)
 
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-			case 'b': arg_board = optarg;
-				break;
-			case 'c':
-				// TODO: download catalog with first post information
-				break;
-			case 'h':
-				// TODO
-				std::printf("Usage: ./program etc");
-				break;
-			case 'p': arg_page = optarg;
-				break;
-			case 't': arg_thread = optarg;
-				break;
-			default: break;
+		case 'b':
+			arg_board = optarg;
+			break;
+		case 'c':
+			arg_catalogue = optarg;
+			break;
+		case 'h':
+			// TODO
+			std::printf("Usage: ./program etc");
+			break;
+		case 'p': arg_page = optarg;
+			break;
+		case 't': arg_thread = optarg;
+			break;
+		default: break;
 		}
 	}
 
@@ -647,6 +649,10 @@ int main(int argc, char **argv)
 		website = website + "thread/" + arg_thread;
 	}
 
+	if(!arg_catalogue.empty()) {
+		website = website + "catalog";
+	}
+
 	auto buffer = download_html(website.c_str());
 	auto result = convert_to_xmltree(buffer, &doc, &root);
 	if (!result) {
@@ -658,8 +664,8 @@ int main(int argc, char **argv)
 	get_thread(root_element);
 
 	xmlNode *html_body = htmlparse_get_body(root);
-	//traverse_dom_trees(html_body);
 
+	// TODO: take care memory leaks
 	delete root_element;
 	xmlFreeDoc(doc);
 
