@@ -20,6 +20,7 @@
 
 #define XPATH_OP_POST "//div[@class='post op']"
 #define XPATH_REPLY_POST "//div[@class='post reply']"
+#define XPATH_THREAD "//div[@class='thread']"
 
 //auto replies = root->find("//blockquote[@class='postMessage']/text()");
 //auto replies = root->find("//blockquote[@class='postMessage']");
@@ -601,6 +602,19 @@ void get_thread(xmlpp::Element *root)
 		}
 
 		std::printf("%s\n", text.c_str());
+	});
+}
+
+void get_catalogue(xmlpp::Element *root)
+{
+	auto threads = root->find(XPATH_THREAD);
+
+	std::for_each(threads.begin(), threads.end(), [](xmlpp::Node *element) {
+		auto thread = reinterpret_cast<xmlpp::Element *>(element);
+
+		//auto link = get_thread_link();
+		//auto numbers = get_thread_numbers();
+		//auto teaser = get_thread_teaser();
 	});
 }
 
