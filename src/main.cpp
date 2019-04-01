@@ -605,6 +605,24 @@ void get_thread(xmlpp::Element *root)
 	});
 }
 
+std::string get_thread_link(xmlpp::Element *element)
+{
+	std::string link;
+	return link;
+}
+
+std::string get_thread_numbers(xmlpp::Element *element)
+{
+	std::string numbers;
+	return numbers;
+}
+
+std::string get_thread_teaser(xmlpp::Element *element)
+{
+	std::string teaser;
+	return teaser;
+}
+
 void get_catalogue(xmlpp::Element *root)
 {
 	auto threads = root->find(XPATH_THREAD);
@@ -612,9 +630,9 @@ void get_catalogue(xmlpp::Element *root)
 	std::for_each(threads.begin(), threads.end(), [](xmlpp::Node *element) {
 		auto thread = reinterpret_cast<xmlpp::Element *>(element);
 
-		//auto link = get_thread_link();
-		//auto numbers = get_thread_numbers();
-		//auto teaser = get_thread_teaser();
+		auto link = get_thread_link(thread);
+		auto numbers = get_thread_numbers(thread);
+		auto teaser = get_thread_teaser(thread);
 	});
 }
 
