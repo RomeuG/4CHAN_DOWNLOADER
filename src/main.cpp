@@ -588,6 +588,12 @@ void get_thread(xmlpp::Element *root)
 std::string get_thread_link(xmlpp::Element *element)
 {
 	std::string link;
+
+	auto link_element = reinterpret_cast<xmlpp::Element*>(element->get_children().front());
+
+	link = "https:";
+	link += link_element->get_attribute_value("href");
+
 	return link;
 }
 
@@ -613,6 +619,8 @@ void get_catalogue(xmlpp::Element *root)
 		auto link = get_thread_link(thread);
 		auto numbers = get_thread_numbers(thread);
 		auto teaser = get_thread_teaser(thread);
+
+		std::printf("%s\n", link.c_str());
 	});
 }
 
@@ -621,9 +629,9 @@ int main(int argc, char **argv)
 	int copts;
 
 	std::string arg_board;
-	std::string arg_catalogue;
 	std::string arg_thread;
 	std::string arg_page;
+	bool arg_catalogue;
 
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
@@ -634,46 +642,48 @@ int main(int argc, char **argv)
 			arg_board = optarg;
 			break;
 		case 'c':
-			arg_catalogue = optarg;
+			arg_catalogue = true;
 			break;
 		case 'h':
-			// TODO
-			std::printf("Usage: ./program etc");
-			break;
-		case 'p': arg_page = optarg;
-			break;
-		case 't': arg_thread = optarg;
-			break;
-		default: break;
-		}
-	}
+			 // TODO
+			 std::printf("Usage: ./program etc");
+			 break;
+		 case 'p': arg_page = optarg;
+			 break;
+		 case 't': arg_thread = optarg;
+			 break;
+		 default: break;
+		 }
+	 }
 
-	std::string website;
-	auto board = Constants::chan_map.find(arg_board);
-	if (board == Constants::chan_map.cend()) {
-		std::printf("Invalid imageboard.\n");
-		exit(EXIT_FAILURE);
-	} else {
-		website = board->second;
-	}
+	 std::string website;
+	 auto board = Constants::chan_map.find(arg_board);
+	 if (board == Constants::chan_map.cend()) {
+		 std::printf("Invalid imageboard.\n");
+		 exit(EXIT_FAILURE);
+	 } else {
+		 website = board->second;
+	 }
 
-	if (!arg_thread.empty()) {
-		website = website + "thread/" + arg_thread;
-	}
+	 if (!arg_thread.empty()) {
+		 website = website + "thread/" + arg_thread;
+	 }
 
-	if(!arg_catalogue.empty()) {
-		website = website + "catalog";
-	}
+	 if(arg_catalogue) {
+		 website = website + "catalog";
+	 }
 
-	auto buffer = download_html(website.c_str());
-	auto result = convert_to_xmltree(buffer, &doc, &root);
-	if (!result) {
-		std::printf("Something went terribly wrong.\n");
-		exit(EXIT_FAILURE);
-	}
+	 auto buffer = download_html(website.c_str());
+	 auto result = convert_to_xmltree(buffer, &doc, &root);
+	 if (!result) {
+		 std::printf("Something went terribly wrong.\n");
+		 exit(EXIT_FAILURE);
+	 }
 
-	auto root_element = new xmlpp::Element(root);
-	get_thread(root_element);
+	 auto root_element = new xmlpp::Element(root);
+	//get_thread(root_element);
+	get_catalogue(root_element);
+	print_xml(root);
 
 	xmlNode *html_body = htmlparse_get_body(root);
 
