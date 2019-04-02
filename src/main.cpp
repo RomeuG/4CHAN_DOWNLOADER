@@ -99,13 +99,6 @@ namespace Constants {
 	};
 }
 
-enum
-{
-	NODE_NAME = 0,
-	NODE_PATH,
-	NODE_VALUE,
-};
-
 std::vector<std::string> split_str(const std::string& string, const char delimiter)
 {
 	std::vector<std::string> results;
@@ -374,19 +367,6 @@ void print_xml(xmlNode *element)
 	auto result = strdup((char *) xmlBufferContent(_buffer));
 	std::printf("Result: %s\n", result);
 	xmlBufferFree(_buffer);
-}
-
-template<class T>
-std::array<std::string, 3> get_node_info(xmlpp::Node *node)
-{
-	std::array<std::string, 3> node_info;
-	auto node_vector = reinterpret_cast<T>(node);
-
-	node_info[NODE_NAME] = node_vector->get_name();
-	node_info[NODE_PATH] = node_vector->get_path();
-	node_info[NODE_VALUE] = node_vector->get_first_child_text()->get_content();
-
-	return node_info;
 }
 
 xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
