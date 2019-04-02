@@ -20,6 +20,8 @@
 
 #define XPATH_OP_POST "//div[@class='post op']"
 #define XPATH_REPLY_POST "//div[@class='post reply']"
+
+// http://a.4cdn.org/g/catalog.json
 #define XPATH_THREAD "//div[@class='thread']"
 
 //auto replies = root->find("//blockquote[@class='postMessage']/text()");
