@@ -371,11 +371,11 @@ void print_xml(xmlNode *element)
 	xmlBufferFree(_buffer);
 }
 
-xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
+xmlpp::Element *get_post_header_ptr(xmlpp::Element *element)
 {
 	auto children = element->get_children();
-	for (xmlpp::Node* &child : children) {
-		auto e = reinterpret_cast<xmlpp::Element*>(child);
+	for (xmlpp::Node *& child : children) {
+		auto e = reinterpret_cast<xmlpp::Element *>(child);
 		if (e->get_attribute("class")->get_value() == "postInfo desktop") {
 			return e;
 		}
@@ -384,14 +384,14 @@ xmlpp::Element* get_post_header_ptr(xmlpp::Element *element)
 	return nullptr;
 }
 
-xmlpp::Element* get_post_file_ptr(xmlpp::Element *element)
+xmlpp::Element *get_post_file_ptr(xmlpp::Element *element)
 {
 	auto children = element->get_children();
-	for (xmlpp::Node* &child : children) {
-		auto e = reinterpret_cast<xmlpp::Element*>(child);
+	for (xmlpp::Node *& child : children) {
+		auto e = reinterpret_cast<xmlpp::Element *>(child);
 		if (e->get_attribute_value("class") == "file") {
 			auto fileText_element = e->get_children().front();
-			return reinterpret_cast<xmlpp::Element*>(fileText_element);
+			return reinterpret_cast<xmlpp::Element *>(fileText_element);
 		}
 	}
 
@@ -405,10 +405,10 @@ std::string get_post_header(xmlpp::Element *element)
 	auto header_children = header_element->get_children();
 
 	std::for_each(header_children.begin(), header_children.end(), [&header](xmlpp::Node *child) {
-		auto child_element = reinterpret_cast<xmlpp::Element*>(child);
+		auto child_element = reinterpret_cast<xmlpp::Element *>(child);
 
 		if (child_element->get_attribute_value("class") == "subject") {
-			auto subject_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
+			auto subject_element = reinterpret_cast<xmlpp::TextNode *>(child_element->get_first_child());
 
 			if (subject_element) {
 				header += subject_element->get_content() + " ";
@@ -416,7 +416,7 @@ std::string get_post_header(xmlpp::Element *element)
 		}
 
 		if (child_element->get_attribute_value("class") == "dateTime") {
-			auto datetime_element = reinterpret_cast<xmlpp::TextNode*>(child_element->get_first_child());
+			auto datetime_element = reinterpret_cast<xmlpp::TextNode *>(child_element->get_first_child());
 
 			if (datetime_element) {
 				header += datetime_element->get_content() + " ";
@@ -427,8 +427,8 @@ std::string get_post_header(xmlpp::Element *element)
 			auto postnum_children = child_element->get_children();
 			auto postnum_child = std::next(postnum_children.begin(), 1);
 
-			auto postnum_element = reinterpret_cast<xmlpp::Element*>(*postnum_child);
-			auto postnum = reinterpret_cast<xmlpp::TextNode*>(postnum_element->get_first_child());
+			auto postnum_element = reinterpret_cast<xmlpp::Element *>(*postnum_child);
+			auto postnum = reinterpret_cast<xmlpp::TextNode *>(postnum_element->get_first_child());
 
 			if (postnum) {
 				header += postnum->get_content();
@@ -439,7 +439,8 @@ std::string get_post_header(xmlpp::Element *element)
 	return header;
 }
 
-std::string get_post_file(xmlpp::Element *element) {
+std::string get_post_file(xmlpp::Element *element)
+{
 	std::string file;
 	std::string file_link;
 
@@ -455,15 +456,15 @@ std::string get_post_file(xmlpp::Element *element) {
 
 	std::for_each(file_children.begin(), file_children.end(), [&file, &file_link](xmlpp::Node *child) {
 		if (child->get_name() == "text") {
-			auto text_element = reinterpret_cast<xmlpp::TextNode*>(child);
+			auto text_element = reinterpret_cast<xmlpp::TextNode *>(child);
 			if (text_element) {
 				file += text_element->get_content();
 			}
 		}
 
 		if (child->get_name() == "a") {
-			auto link_element = reinterpret_cast<xmlpp::Element*>(child);
-			auto link_text = reinterpret_cast<xmlpp::TextNode*>(child->get_first_child());
+			auto link_element = reinterpret_cast<xmlpp::Element *>(child);
+			auto link_text = reinterpret_cast<xmlpp::TextNode *>(child->get_first_child());
 
 			file_link = link_element->get_attribute_value("href");
 
@@ -501,21 +502,21 @@ std::string get_post_text(xmlpp::Element *element)
 		}
 
 		if (sibling->get_name() == "a") {
-			auto link_text = reinterpret_cast<xmlpp::TextNode*>(sibling->get_first_child());
+			auto link_text = reinterpret_cast<xmlpp::TextNode *>(sibling->get_first_child());
 			if (link_text) {
 				post += link_text->get_content();
 			}
 		}
 
 		if (sibling->get_name() == "span") {
-			auto quote = reinterpret_cast<xmlpp::TextNode*>(sibling->get_first_child());
+			auto quote = reinterpret_cast<xmlpp::TextNode *>(sibling->get_first_child());
 			if (quote) {
 				post += quote->get_content();
 			}
 		}
 
 		if (sibling->get_name() == "pre") {
-			auto pre_element = reinterpret_cast<xmlpp::Node*>(sibling);
+			auto pre_element = reinterpret_cast<xmlpp::Node *>(sibling);
 			auto pre_children = sibling->get_children();
 
 			if (pre_children.size() == 0) {
@@ -524,11 +525,11 @@ std::string get_post_text(xmlpp::Element *element)
 
 			post += "```\n";
 
-			std::for_each(pre_children.begin(), pre_children.end(), [&post](xmlpp::Node* child) {
+			std::for_each(pre_children.begin(), pre_children.end(), [&post](xmlpp::Node *child) {
 				auto name = child->get_name();
 
 				if (child->get_name() == "text") {
-					auto span_text = reinterpret_cast<xmlpp::TextNode*>(child);
+					auto span_text = reinterpret_cast<xmlpp::TextNode *>(child);
 					post += span_text->get_content();
 				}
 
@@ -591,7 +592,7 @@ std::string get_thread_link(xmlpp::Element *element)
 {
 	std::string link;
 
-	auto link_element = reinterpret_cast<xmlpp::Element*>(element->get_children().front());
+	auto link_element = reinterpret_cast<xmlpp::Element *>(element->get_children().front());
 
 	link = "https:";
 	link += link_element->get_attribute_value("href");
@@ -640,49 +641,47 @@ int main(int argc, char **argv)
 
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
-		case 'b':
-			arg_board = optarg;
-			break;
-		case 'c':
-			arg_catalogue = true;
-			break;
-		case 'h':
-			 // TODO
-			 std::printf("Usage: ./program etc");
-			 break;
-		 case 'p': arg_page = optarg;
-			 break;
-		 case 't': arg_thread = optarg;
-			 break;
-		 default: break;
-		 }
-	 }
+			case 'b': arg_board = optarg;
+				break;
+			case 'c': arg_catalogue = true;
+				break;
+			case 'h':
+				// TODO
+				std::printf("Usage: ./program etc");
+				break;
+			case 'p': arg_page = optarg;
+				break;
+			case 't': arg_thread = optarg;
+				break;
+			default: break;
+		}
+	}
 
-	 std::string website;
-	 auto board = Constants::chan_map.find(arg_board);
-	 if (board == Constants::chan_map.cend()) {
-		 std::printf("Invalid imageboard.\n");
-		 exit(EXIT_FAILURE);
-	 } else {
-		 website = board->second;
-	 }
+	std::string website;
+	auto board = Constants::chan_map.find(arg_board);
+	if (board == Constants::chan_map.cend()) {
+		std::printf("Invalid imageboard.\n");
+		exit(EXIT_FAILURE);
+	} else {
+		website = board->second;
+	}
 
-	 if (!arg_thread.empty()) {
-		 website = website + "thread/" + arg_thread;
-	 }
+	if (!arg_thread.empty()) {
+		website = website + "thread/" + arg_thread;
+	}
 
-	 if(arg_catalogue) {
-		 website = website + "catalog";
-	 }
+	if (arg_catalogue) {
+		website = website + "catalog";
+	}
 
-	 auto buffer = download_html(website.c_str());
-	 auto result = convert_to_xmltree(buffer, &doc, &root);
-	 if (!result) {
-		 std::printf("Something went terribly wrong.\n");
-		 exit(EXIT_FAILURE);
-	 }
+	auto buffer = download_html(website.c_str());
+	auto result = convert_to_xmltree(buffer, &doc, &root);
+	if (!result) {
+		std::printf("Something went terribly wrong.\n");
+		exit(EXIT_FAILURE);
+	}
 
-	 auto root_element = new xmlpp::Element(root);
+	auto root_element = new xmlpp::Element(root);
 	//get_thread(root_element);
 	get_catalogue(root_element);
 	print_xml(root);
