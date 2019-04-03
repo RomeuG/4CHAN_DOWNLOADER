@@ -590,35 +590,22 @@ void get_thread(xmlpp::Element *root)
 	});
 }
 
-std::string get_thread_link(xmlpp::Element *element)
+std::string get_thread_info(nlohmann::json& thread)
 {
-	std::string link;
+	std::string info;
 
-	auto link_element = reinterpret_cast<xmlpp::Element *>(element->get_children().front());
+	info = "Date: " + thread["now"].dump();
 
-	link = "https:";
-	link += link_element->get_attribute_value("href");
-
-	return link;
+	return info;
 }
 
-std::string get_thread_numbers(xmlpp::Element *element)
-{
-	std::string numbers;
-	return numbers;
-}
-
-std::string get_thread_teaser(xmlpp::Element *element)
-{
-	std::string teaser;
-	return teaser;
-}
 
 void get_catalogue(nlohmann::json& catalogue_json)
 {
 	for (auto& page : catalogue_json) {
-		for (auto& thread : page["threads"]) {
-			//std::printf("%s\n", thread["name"].dump().c_str());
+		for (nlohmann::json& thread : page["threads"]) {
+			std::string thread_info = get_thread_info(thread);
+			std::printf("%s\n", thread_info.c_str());
 		}
 	}
 }
