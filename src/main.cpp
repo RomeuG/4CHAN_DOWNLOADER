@@ -614,19 +614,13 @@ std::string get_thread_teaser(xmlpp::Element *element)
 	return teaser;
 }
 
-void get_catalogue(xmlpp::Element *root)
+void get_catalogue(nlohmann::json& catalogue_json)
 {
-	auto threads = root->find(XPATH_THREAD);
-
-	std::for_each(threads.begin(), threads.end(), [](xmlpp::Node *element) {
-		auto thread = reinterpret_cast<xmlpp::Element *>(element);
-
-		auto link = get_thread_link(thread);
-		auto numbers = get_thread_numbers(thread);
-		auto teaser = get_thread_teaser(thread);
-
-		std::printf("%s\n", link.c_str());
-	});
+	for (auto& page : catalogue_json) {
+		for (auto& thread : page["threads"]) {
+			//std::printf("%s\n", thread["name"].dump().c_str());
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -636,7 +630,7 @@ int main(int argc, char **argv)
 	std::string arg_board;
 	std::string arg_thread;
 	std::string arg_page;
-	bool arg_catalogue;
+	bool arg_catalogue = false;
 
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
@@ -673,25 +667,27 @@ int main(int argc, char **argv)
 	}
 
 	if (arg_catalogue) {
-		website = website + "catalog";
+		website = "http://a.4cdn.org/" + arg_board + "/catalog.json";
 	}
 
 	auto buffer = download_html(website.c_str());
-	auto result = convert_to_xmltree(buffer, &doc, &root);
-	if (!result) {
-		std::printf("Something went terribly wrong.\n");
-		exit(EXIT_FAILURE);
-	}
+	//auto result = convert_to_xmltree(buffer, &doc, &root);
+//	if (!result) {
+//		std::printf("Something went terribly wrong.\n");
+//		exit(EXIT_FAILURE);
+//	}
 
-	auto root_element = new xmlpp::Element(root);
+	nlohmann::json catalog_json = nlohmann::json::parse(buffer);
+
+	//auto root_element = new xmlpp::Element(root);
 	//get_thread(root_element);
-	get_catalogue(root_element);
-	print_xml(root);
-
-	xmlNode *html_body = htmlparse_get_body(root);
+	get_catalogue(catalog_json);
+//	print_xml(root);
+//
+//	xmlNode *html_body = htmlparse_get_body(root);
 
 	// TODO: take care memory leaks
-	delete root_element;
+	// delete root_element;
 	xmlFreeDoc(doc);
 
 	return EXIT_SUCCESS;
