@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "json.hpp"
+
 // XPATH constants
 #define XPATH_ALL_IMGS "//img"
 #define XPATH_TITLE "//title"
