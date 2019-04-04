@@ -149,7 +149,7 @@ std::string download_html(const char *url)
 
 	if (curl_ctx == nullptr) {
 		std::printf("Failed to create CURL connection\n");
-		return nullptr;
+		return "";
 	}
 
 	headers = curl_slist_append(headers, "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3724.8 Safari/537.36");
@@ -173,7 +173,7 @@ std::string download_html(const char *url)
 
 	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
 		std::printf("Response code: %d\n", res_code);
-		return nullptr;
+		return "";
 	}
 
 	curl_slist_free_all(headers);
