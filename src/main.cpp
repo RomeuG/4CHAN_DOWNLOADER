@@ -452,7 +452,7 @@ std::string get_post_file(xmlpp::Element *element)
 	}
 
 	auto file_children = file_element->get_children();
-	if (file_children.size() == 0) {
+	if (file_children.empty()) {
 		return file;
 	}
 
@@ -521,7 +521,7 @@ std::string get_post_text(xmlpp::Element *element)
 			auto pre_element = reinterpret_cast<xmlpp::Node *>(sibling);
 			auto pre_children = sibling->get_children();
 
-			if (pre_children.size() == 0) {
+			if (pre_children.empty()) {
 				break;
 			}
 
