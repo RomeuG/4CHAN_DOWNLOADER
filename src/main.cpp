@@ -182,7 +182,7 @@ std::string download_html(const char *url)
 	return buffer;
 }
 
-bool convert_to_xmltree(std::string_view buffer, htmlDocPtr *document, xmlNode **root)
+bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **root)
 {
 	*document = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
 	if (*document == nullptr) {
@@ -598,7 +598,6 @@ std::string get_thread_info(nlohmann::json& thread)
 
 	return info;
 }
-
 
 void get_catalogue(nlohmann::json& catalogue_json)
 {
