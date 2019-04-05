@@ -601,6 +601,14 @@ std::string get_thread_info(nlohmann::json& thread)
 	info += thread["no"].dump() + "\n";
 
 	try {
+		info += thread["sub"].get<std::string>();
+	} catch (nlohmann::detail::type_error&) {
+		info += "<empty title>";
+	}
+
+	info += " (" + thread["replies"].dump() + " Replies, " + thread["images"].dump() + " Images)\n";
+
+	try {
 		info += thread["com"].get<std::string>() + "\n\n";
 	} catch (nlohmann::detail::type_error&) {
 		info += "<empty body>\n\n";
