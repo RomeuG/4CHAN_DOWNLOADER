@@ -594,7 +594,17 @@ std::string get_thread_info(nlohmann::json& thread)
 {
 	std::string info;
 
-	info = "Date: " + thread["now"].dump();
+	info += thread["name"].get<std::string>() + " ";
+	info += thread["filename"].get<std::string>() + thread["ext"].get<std::string>();
+	info += " (" + thread["w"].dump() + "x" + thread["h"].dump() + ") ";
+	info += thread["now"].get<std::string>() + " ";
+	info += thread["no"].dump() + "\n";
+
+	try {
+		info += thread["com"].get<std::string>() + "\n\n";
+	} catch (nlohmann::detail::type_error&) {
+		info += "<empty body>\n\n";
+	}
 
 	return info;
 }
