@@ -590,6 +590,36 @@ void get_thread(xmlpp::Element *root)
 	});
 }
 
+void replace(std::string& str, const std::string_view from, const std::string_view to)
+{
+	if (from.empty()) {
+		return;
+	}
+
+	std::size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length();
+	}
+}
+
+void sanitize_string(std::string& str)
+{
+	replace(str, "<br>", "\n");
+	replace(str, "<wbr>", "");
+	replace(str, "<span class=\"deadlink\"", "");
+	replace(str, "<span class=\"quote\">", ">");
+	replace(str, "</span>", "");
+
+	replace(str, "<pre class=\"prettyprint\">", "```");
+	replace(str, "</pre>", "```");
+
+	replace(str, "&#039;", "'");
+
+	replace(str, "&gt;", ">");
+	replace(str, "&quot;", "\"");
+}
+
 std::string get_thread_info(nlohmann::json& thread)
 {
 	std::string info;
@@ -609,7 +639,9 @@ std::string get_thread_info(nlohmann::json& thread)
 	info += " (" + thread["replies"].dump() + " Replies, " + thread["images"].dump() + " Images)\n";
 
 	try {
-		info += thread["com"].get<std::string>() + "\n\n";
+		auto op = thread["com"].get<std::string>();
+		sanitize_string(op);
+		info += op + "\n\n";
 	} catch (nlohmann::detail::type_error&) {
 		info += "<empty body>\n\n";
 	}
