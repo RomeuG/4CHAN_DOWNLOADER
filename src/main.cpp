@@ -112,6 +112,20 @@ std::vector<std::string> split_str(const std::string& string, const char delimit
 	return results;
 }
 
+void _replace(std::string& str, const std::string_view from, const std::string_view to)
+{
+	if (from.empty()) {
+		return;
+	}
+
+	std::size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length();
+	}
+}
+
+
 static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data)
 {
 	if (writer_data == nullptr) {
@@ -489,59 +503,89 @@ std::string get_post_text(xmlpp::Element *element)
 {
 	std::string post;
 
-	auto blockquote = reinterpret_cast<xmlpp::Element *>(element->get_children().back());
+	auto sibling = element->get_first_child();
 
-	auto sibling = blockquote->get_first_child();
 	while (sibling) {
+		auto sub_sibling = sibling->get_first_child();
+
+		//std::printf("Parent: %s\n", sibling->get_name().c_str());
 		if (sibling->get_name() == "br") {
 			post += "\n";
 		}
 
-		if (sibling->get_name() == "text") {
-			auto text = reinterpret_cast<xmlpp::TextNode *>(sibling);
-			if (text) {
-				post += text->get_content();
-			}
-		}
-
-		if (sibling->get_name() == "a") {
-			auto link_text = reinterpret_cast<xmlpp::TextNode *>(sibling->get_first_child());
-			if (link_text) {
-				post += link_text->get_content();
-			}
-		}
-
-		if (sibling->get_name() == "span") {
-			auto quote = reinterpret_cast<xmlpp::TextNode *>(sibling->get_first_child());
-			if (quote) {
-				post += quote->get_content();
-			}
-		}
-
-		if (sibling->get_name() == "pre") {
-			auto pre_element = reinterpret_cast<xmlpp::Node *>(sibling);
-			auto pre_children = sibling->get_children();
-
-			if (pre_children.empty()) {
-				break;
+		while (sub_sibling) {
+			//std::printf("Child: %s\n", sub_sibling->get_name().c_str());
+			if (sub_sibling->get_name() == "br") {
+				post += "\n";
 			}
 
-			post += "```\n";
+			if (sub_sibling->get_name() == "p") {
+				auto paragraph_element = reinterpret_cast<xmlpp::Element *>(sub_sibling);
+				if (paragraph_element) {
+					auto paragraph_text = reinterpret_cast<xmlpp::TextNode *>(sub_sibling->get_first_child());
+					post += paragraph_text->get_content();
+				}
+			}
 
-			std::for_each(pre_children.begin(), pre_children.end(), [&post](xmlpp::Node *child) {
-				auto name = child->get_name();
+			if (sub_sibling->get_name() == "i") {
+				auto italic_element = reinterpret_cast<xmlpp::Element *>(sub_sibling);
+				if (italic_element) {
+					auto italic_text = reinterpret_cast<xmlpp::TextNode *>(sub_sibling->get_first_child());
+					post += italic_text->get_content();
+				}
+			}
 
-				if (child->get_name() == "text") {
-					auto span_text = reinterpret_cast<xmlpp::TextNode *>(child);
-					post += span_text->get_content();
+			if (sub_sibling->get_name() == "text") {
+				auto text = reinterpret_cast<xmlpp::TextNode *>(sub_sibling);
+				if (text) {
+					std::string sanitized = text->get_content();
+					_replace(sanitized, "\n", "");
+					_replace(sanitized, "\r", "");
+					post += sanitized;
+				}
+			}
+
+			if (sub_sibling->get_name() == "a") {
+				auto link_text = reinterpret_cast<xmlpp::TextNode *>(sub_sibling->get_first_child());
+				if (link_text) {
+					post += link_text->get_content();
+				}
+			}
+
+			if (sub_sibling->get_name() == "span") {
+				auto quote = reinterpret_cast<xmlpp::TextNode *>(sub_sibling->get_first_child());
+				if (quote) {
+					post += quote->get_content();
+				}
+			}
+
+			if (sub_sibling->get_name() == "pre") {
+				auto pre_element = reinterpret_cast<xmlpp::Node *>(sub_sibling);
+				auto pre_children = sub_sibling->get_children();
+
+				if (pre_children.empty()) {
+					break;
 				}
 
-				if (child->get_name() == "br") {
-					post += "\n";
-				}
-			});
+				post += "```\n";
 
-			post += "```";
+				std::for_each(pre_children.begin(), pre_children.end(), [&post](xmlpp::Node *child) {
+					auto name = child->get_name();
+
+					if (child->get_name() == "text") {
+						auto span_text = reinterpret_cast<xmlpp::TextNode *>(child);
+						post += span_text->get_content();
+					}
+
+					if (child->get_name() == "br") {
+						post += "\n";
+					}
+				});
+
+				post += "```";
+			}
+
+			sub_sibling = sub_sibling->get_next_sibling();
 		}
 
 		sibling = sibling->get_next_sibling();
@@ -591,46 +635,53 @@ void get_thread(xmlpp::Element *root)
 	});
 }
 
-void replace(std::string& str, const std::string_view from, const std::string_view to)
-{
-	if (from.empty()) {
-		return;
-	}
-
-	std::size_t start_pos = 0;
-	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-		str.replace(start_pos, from.length(), to);
-		start_pos += to.length();
-	}
-}
-
 std::string sanitize_string(std::string& str)
 {
-	replace(str, "<br>", "\n");
-	replace(str, "<wbr>", "");
-	replace(str, "<span class=\"deadlink\"", "");
-	replace(str, "<span class=\"quote\">", ">");
-	replace(str, "</span>", "");
+	_replace(str, "<br>", "\n");
+	_replace(str, "<wbr>", "");
+	_replace(str, "<span class=\"deadlink\"", "");
+	_replace(str, "<span class=\"quote\">", ">");
+	_replace(str, "</span>", "");
 
-	replace(str, "</a>", "");
-	replace(str, "<b>", "");
-	replace(str, "</b>", "");
-	replace(str, "<u>", "");
-	replace(str, "</u>", "");
-	replace(str, "<i>", "");
-	replace(str, "</i>", "");
+	_replace(str, "</a>", "");
+	_replace(str, "<b>", "");
+	_replace(str, "</b>", "");
+	_replace(str, "<u>", "");
+	_replace(str, "</u>", "");
+	_replace(str, "<i>", "");
+	_replace(str, "</i>", "");
 
-	replace(str, "<pre class=\"prettyprint\">", "```");
-	replace(str, "</pre>", "```");
+	_replace(str, "<pre class=\"prettyprint\">", "```");
+	_replace(str, "</pre>", "```");
 
-	replace(str, "&#039;", "'");
+	_replace(str, "&#039;", "'");
 
-	replace(str, "&gt;", ">");
-	replace(str, "&quot;", "\"");
+	_replace(str, "&gt;", ">");
+	_replace(str, "&quot;", "\"");
 
 	// regex replace
 	std::regex vowels("<a\\shref=\"\(.*)\">");
 	return std::regex_replace(str, vowels, "");
+}
+
+std::string get_post_text_from_json(std::string& str)
+{
+	htmlDocPtr doc = nullptr;
+	xmlNode *root = nullptr;
+
+	auto result = convert_to_xmltree(str, &doc, &root);
+	if (!result) {
+		std::printf("Failed converting into xmltree");
+		exit(EXIT_FAILURE);
+	}
+
+	auto root_element = new xmlpp::Element(root);
+	auto body = root_element->find("//body");
+
+	if (body.empty()) { return "\n\n"; }
+	auto body_element = reinterpret_cast<xmlpp::Element *>(body[0]);
+	auto text = get_post_text(body_element);
+	return text;
 }
 
 std::string get_thread_info(nlohmann::json& thread)
@@ -659,8 +710,9 @@ std::string get_thread_info(nlohmann::json& thread)
 
 	try {
 		auto op = thread["com"].get<std::string>();
-		auto final = sanitize_string(op);
-		info += final + "\n\n";
+		_replace(op, "<wbr>", "");
+		auto final = get_post_text_from_json(op);
+		info += final;
 	} catch (nlohmann::detail::type_error&) {
 		info += "<empty body>\n\n";
 	}
