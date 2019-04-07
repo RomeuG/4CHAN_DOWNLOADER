@@ -510,8 +510,19 @@ std::string get_post_text(xmlpp::Element *element)
 		auto sub_sibling = sibling->get_first_child();
 
 		//std::printf("Parent: %s\n", sibling->get_name().c_str());
+
 		if (sibling->get_name() == "br") {
 			post += "\n";
+		}
+
+		if (sibling->get_name() == "text") {
+			auto text = reinterpret_cast<xmlpp::TextNode *>(sibling);
+			if (text) {
+				std::string sanitized = text->get_content();
+				_replace(sanitized, "\n", "");
+				_replace(sanitized, "\r", "");
+				post += sanitized;
+			}
 		}
 
 		while (sub_sibling) {
@@ -551,6 +562,11 @@ std::string get_post_text(xmlpp::Element *element)
 				if (link_text) {
 					post += link_text->get_content();
 				}
+//
+//				auto link = reinterpret_cast<xmlpp::Element*>(sub_sibling);
+//				if (link) {
+//					post += "(" + link->get_attribute_value("href") + ")";
+//				}
 			}
 
 			if (sub_sibling->get_name() == "span") {
