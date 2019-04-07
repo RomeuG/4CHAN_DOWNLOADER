@@ -499,6 +499,7 @@ std::string get_post_file(xmlpp::Element *element)
 	return file;
 }
 
+// TODO: shorten function
 std::string get_post_text(xmlpp::Element *element)
 {
 	std::string post;
@@ -678,10 +679,12 @@ std::string get_post_text_from_json(std::string& str)
 	auto root_element = new xmlpp::Element(root);
 	auto body = root_element->find("//body");
 
-	if (body.empty()) { return "\n\n"; }
+	if (body.empty()) {
+		return "\n\n";
+	}
+
 	auto body_element = reinterpret_cast<xmlpp::Element *>(body[0]);
-	auto text = get_post_text(body_element);
-	return text;
+	return get_post_text(body_element);
 }
 
 std::string get_thread_info(nlohmann::json& thread)
@@ -709,10 +712,11 @@ std::string get_thread_info(nlohmann::json& thread)
 	info += " (" + thread["replies"].dump() + " Replies, " + thread["images"].dump() + " Images)\n";
 
 	try {
+		// get string and replace <wbr> with empty string
 		auto op = thread["com"].get<std::string>();
 		_replace(op, "<wbr>", "");
-		auto final = get_post_text_from_json(op);
-		info += final;
+
+		info += get_post_text_from_json(op);
 	} catch (nlohmann::detail::type_error&) {
 		info += "<empty body>\n\n";
 	}
