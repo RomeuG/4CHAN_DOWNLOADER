@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <filesystem>
+#include <regex>
 
 #include <libxml++-3.0/libxml++/libxml++.h>
 #include <libxml2/libxml/HTMLparser.h>
@@ -603,13 +604,21 @@ void replace(std::string& str, const std::string_view from, const std::string_vi
 	}
 }
 
-void sanitize_string(std::string& str)
+std::string sanitize_string(std::string& str)
 {
 	replace(str, "<br>", "\n");
 	replace(str, "<wbr>", "");
 	replace(str, "<span class=\"deadlink\"", "");
 	replace(str, "<span class=\"quote\">", ">");
 	replace(str, "</span>", "");
+
+	replace(str, "</a>", "");
+	replace(str, "<b>", "");
+	replace(str, "</b>", "");
+	replace(str, "<u>", "");
+	replace(str, "</u>", "");
+	replace(str, "<i>", "");
+	replace(str, "</i>", "");
 
 	replace(str, "<pre class=\"prettyprint\">", "```");
 	replace(str, "</pre>", "```");
@@ -618,6 +627,10 @@ void sanitize_string(std::string& str)
 
 	replace(str, "&gt;", ">");
 	replace(str, "&quot;", "\"");
+
+	// regex replace
+	std::regex vowels("<a\\shref=\"\(.*)\">");
+	return std::regex_replace(str, vowels, "");
 }
 
 std::string get_thread_info(nlohmann::json& thread)
@@ -646,8 +659,8 @@ std::string get_thread_info(nlohmann::json& thread)
 
 	try {
 		auto op = thread["com"].get<std::string>();
-		sanitize_string(op);
-		info += op + "\n\n";
+		auto final = sanitize_string(op);
+		info += final + "\n\n";
 	} catch (nlohmann::detail::type_error&) {
 		info += "<empty body>\n\n";
 	}
