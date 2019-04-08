@@ -562,11 +562,15 @@ std::string get_post_text(xmlpp::Element *element)
 				if (link_text) {
 					post += link_text->get_content();
 				}
-//
-//				auto link = reinterpret_cast<xmlpp::Element*>(sub_sibling);
-//				if (link) {
-//					post += "(" + link->get_attribute_value("href") + ")";
-//				}
+
+				auto link = reinterpret_cast<xmlpp::Element *>(sub_sibling);
+				if (link) {
+					auto href = link->get_attribute_value("href");
+
+					if (href != link_text->get_content()) {
+						post += " (" + href + ")";
+					}
+				}
 			}
 
 			if (sub_sibling->get_name() == "span") {
