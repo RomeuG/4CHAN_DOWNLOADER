@@ -564,7 +564,7 @@ std::string get_post_text(xmlpp::Element *element)
 				}
 
 				auto link = reinterpret_cast<xmlpp::Element *>(sub_sibling);
-				if (link) {
+				if (link && link_text) {
 					auto href = link->get_attribute_value("href");
 
 					if (href != link_text->get_content()) {
