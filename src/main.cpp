@@ -421,7 +421,7 @@ std::string get_post_header(xmlpp::Element *element)
 	auto header_element = get_post_header_ptr(element);
 	auto header_children = header_element->get_children();
 
-	std::for_each(header_children.begin(), header_children.end(), [&header](xmlpp::Node *child) {
+	std::for_each(header_children.begin(), header_children.end(), [&](xmlpp::Node *child) {
 		auto child_element = reinterpret_cast<xmlpp::Element *>(child);
 
 		if (child_element->get_attribute_value("class") == "subject") {
@@ -471,7 +471,7 @@ std::string get_post_file(xmlpp::Element *element)
 		return file;
 	}
 
-	std::for_each(file_children.begin(), file_children.end(), [&file, &file_link](xmlpp::Node *child) {
+	std::for_each(file_children.begin(), file_children.end(), [&](xmlpp::Node *child) {
 		if (child->get_name() == "text") {
 			auto text_element = reinterpret_cast<xmlpp::TextNode *>(child);
 			if (text_element) {
@@ -590,7 +590,7 @@ std::string get_post_text(xmlpp::Element *element)
 
 				post += "```\n";
 
-				std::for_each(pre_children.begin(), pre_children.end(), [&post](xmlpp::Node *child) {
+				std::for_each(pre_children.begin(), pre_children.end(), [&](xmlpp::Node *child) {
 					auto name = child->get_name();
 
 					if (child->get_name() == "text") {
