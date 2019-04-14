@@ -125,7 +125,6 @@ void _replace(std::string& str, const std::string_view from, const std::string_v
 	}
 }
 
-
 static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data)
 {
 	if (writer_data == nullptr) {
@@ -618,73 +617,6 @@ std::string get_post_text(xmlpp::Element *element)
 	return post;
 }
 
-void get_thread(xmlpp::Element *root)
-{
-	auto op = root->find(XPATH_OP_POST);
-	auto replies = root->find(XPATH_REPLY_POST);
-
-	std::for_each(op.begin(), op.end(), [](xmlpp::Node *element) {
-		auto post = reinterpret_cast<xmlpp::Element *>(element);
-
-		auto header = get_post_header(post);
-		auto file = get_post_file(post);
-		auto text = get_post_text(post);
-
-		std::printf("%s\n", header.c_str());
-
-		if (!file.empty()) {
-			std::printf("%s\n", file.c_str());
-		}
-
-		std::printf("%s\n", text.c_str());
-	});
-
-	std::for_each(replies.begin(), replies.end(), [](xmlpp::Node *element) {
-		auto post = reinterpret_cast<xmlpp::Element *>(element);
-
-		auto header = get_post_header(post);
-		auto file = get_post_file(post);
-		auto text = get_post_text(post);
-
-		std::printf("%s\n", header.c_str());
-
-		if (!file.empty()) {
-			std::printf("%s\n", file.c_str());
-		}
-
-		std::printf("%s\n", text.c_str());
-	});
-}
-
-std::string sanitize_string(std::string& str)
-{
-	_replace(str, "<br>", "\n");
-	_replace(str, "<wbr>", "");
-	_replace(str, "<span class=\"deadlink\"", "");
-	_replace(str, "<span class=\"quote\">", ">");
-	_replace(str, "</span>", "");
-
-	_replace(str, "</a>", "");
-	_replace(str, "<b>", "");
-	_replace(str, "</b>", "");
-	_replace(str, "<u>", "");
-	_replace(str, "</u>", "");
-	_replace(str, "<i>", "");
-	_replace(str, "</i>", "");
-
-	_replace(str, "<pre class=\"prettyprint\">", "```");
-	_replace(str, "</pre>", "```");
-
-	_replace(str, "&#039;", "'");
-
-	_replace(str, "&gt;", ">");
-	_replace(str, "&quot;", "\"");
-
-	// regex replace
-	std::regex vowels("<a\\shref=\"\(.*)\">");
-	return std::regex_replace(str, vowels, "");
-}
-
 std::string get_post_text_from_json(std::string& str)
 {
 	htmlDocPtr doc = nullptr;
@@ -707,33 +639,45 @@ std::string get_post_text_from_json(std::string& str)
 	return get_post_text(body_element);
 }
 
-std::string get_thread_info(nlohmann::json& thread)
+std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 {
 	std::string info;
 
-	info += thread["name"].get<std::string>() + " ";
-
 	try {
-		info += thread["filename"].get<std::string>() + thread["ext"].get<std::string>();
-		info += " (" + thread["w"].dump() + "x" + thread["h"].dump() + ") ";
+		info += post["name"].get<std::string>() + " ";
 	} catch (nlohmann::detail::type_error&) {
-		info += "<file deleted> ";
+		info += post["trip"].get<std::string>() + " ";
 	}
 
-	info += thread["now"].get<std::string>() + " ";
-	info += thread["no"].dump() + "\n";
-
 	try {
-		info += thread["sub"].get<std::string>();
+		info += post["filename"].get<std::string>() + post["ext"].get<std::string>();
+		info += " (" + post["w"].dump() + "x" + post["h"].dump() + ") ";
 	} catch (nlohmann::detail::type_error&) {
-		info += "<empty title>";
+		if (catalogue) {
+			info += "<file deleted> ";
+		}
 	}
 
-	info += " (" + thread["replies"].dump() + " Replies, " + thread["images"].dump() + " Images)\n";
+	info += post["now"].get<std::string>() + " ";
+	info += post["no"].dump() + "\n";
+
+	try {
+		info += post["sub"].get<std::string>();
+	} catch (nlohmann::detail::type_error&) {
+		if (catalogue) {
+			info += "<empty title>";
+		}
+	}
+
+	if (catalogue) {
+		info += " (" + post["replies"].dump() + " Replies, " + post["images"].dump() + " Images)\n";
+	} else {
+		//info += "\n";
+	}
 
 	try {
 		// get string and replace <wbr> with empty string
-		auto op = thread["com"].get<std::string>();
+		auto op = post["com"].get<std::string>();
 		_replace(op, "<wbr>", "");
 
 		info += get_post_text_from_json(op);
@@ -744,11 +688,19 @@ std::string get_thread_info(nlohmann::json& thread)
 	return info;
 }
 
+void get_thread(nlohmann::json& catalogue_json)
+{
+	for (nlohmann::json& post : catalogue_json["posts"]) {
+		std::string thread_info = get_post_info(post);
+		std::printf("%s\n", thread_info.c_str());
+	}
+}
+
 void get_catalogue(nlohmann::json& catalogue_json)
 {
 	for (auto& page : catalogue_json) {
 		for (nlohmann::json& thread : page["threads"]) {
-			std::string thread_info = get_thread_info(thread);
+			std::string thread_info = get_post_info(thread, true);
 			std::printf("%s\n", thread_info.c_str());
 		}
 	}
@@ -794,7 +746,8 @@ int main(int argc, char **argv)
 	}
 
 	if (!arg_thread.empty()) {
-		website = website + "thread/" + arg_thread;
+		//website = website + "thread/" + arg_thread + ".json";
+		website = "http://a.4cdn.org/" + arg_board + "/thread/" + arg_thread + ".json";
 	}
 
 	if (arg_catalogue) {
@@ -802,20 +755,10 @@ int main(int argc, char **argv)
 	}
 
 	auto buffer = download_html(website.c_str());
-	//auto result = convert_to_xmltree(buffer, &doc, &root);
-//	if (!result) {
-//		std::printf("Something went terribly wrong.\n");
-//		exit(EXIT_FAILURE);
-//	}
+	nlohmann::json buffer_json = nlohmann::json::parse(buffer);
 
-	nlohmann::json catalog_json = nlohmann::json::parse(buffer);
-
-	//auto root_element = new xmlpp::Element(root);
-	//get_thread(root_element);
-	get_catalogue(catalog_json);
-//	print_xml(root);
-//
-//	xmlNode *html_body = htmlparse_get_body(root);
+	get_thread(buffer_json);
+	//get_catalogue(catalog_json);
 
 	// TODO: take care memory leaks
 	// delete root_element;
