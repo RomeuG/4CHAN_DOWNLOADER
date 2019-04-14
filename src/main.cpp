@@ -579,32 +579,6 @@ std::string get_post_text(xmlpp::Element *element)
 				}
 			}
 
-			if (sub_sibling->get_name() == "pre") {
-				auto pre_element = reinterpret_cast<xmlpp::Node *>(sub_sibling);
-				auto pre_children = sub_sibling->get_children();
-
-				if (pre_children.empty()) {
-					break;
-				}
-
-				post += "```\n";
-
-				std::for_each(pre_children.begin(), pre_children.end(), [&](xmlpp::Node *child) {
-					auto name = child->get_name();
-
-					if (child->get_name() == "text") {
-						auto span_text = reinterpret_cast<xmlpp::TextNode *>(child);
-						post += span_text->get_content();
-					}
-
-					if (child->get_name() == "br") {
-						post += "\n";
-					}
-				});
-
-				post += "```";
-			}
-
 			sub_sibling = sub_sibling->get_next_sibling();
 		}
 
