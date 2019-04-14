@@ -602,7 +602,6 @@ std::string get_post_text_from_json(std::string& str)
 		exit(EXIT_FAILURE);
 	}
 
-	//auto root_element = new xmlpp::Element(root);
 	auto root_element = std::make_unique<xmlpp::Element>(root);
 	auto body = root_element->find("//body");
 
@@ -650,8 +649,10 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 
 	if (catalogue) {
 		info += " (" + post["replies"].dump() + " Replies, " + post["images"].dump() + " Images)\n";
-	} else {
-		//info += "\n";
+	}
+
+	if (!post["tim"].empty()) {
+		info += "Media: http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>() + "\n";
 	}
 
 	try {
