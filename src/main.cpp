@@ -2,6 +2,7 @@
 #include <cstring>
 #include <filesystem>
 #include <regex>
+#include <memory>
 
 #include <libxml++-3.0/libxml++/libxml++.h>
 #include <libxml2/libxml/HTMLparser.h>
@@ -508,8 +509,6 @@ std::string get_post_text(xmlpp::Element *element)
 	while (sibling) {
 		auto sub_sibling = sibling->get_first_child();
 
-		//std::printf("Parent: %s\n", sibling->get_name().c_str());
-
 		if (sibling->get_name() == "br") {
 			post += "\n";
 		}
@@ -525,7 +524,6 @@ std::string get_post_text(xmlpp::Element *element)
 		}
 
 		while (sub_sibling) {
-			//std::printf("Child: %s\n", sub_sibling->get_name().c_str());
 			if (sub_sibling->get_name() == "br") {
 				post += "\n";
 			}
@@ -593,6 +591,8 @@ std::string get_post_text(xmlpp::Element *element)
 
 std::string get_post_text_from_json(std::string& str)
 {
+	std::string text;
+
 	htmlDocPtr doc = nullptr;
 	xmlNode *root = nullptr;
 
@@ -602,7 +602,8 @@ std::string get_post_text_from_json(std::string& str)
 		exit(EXIT_FAILURE);
 	}
 
-	auto root_element = new xmlpp::Element(root);
+	//auto root_element = new xmlpp::Element(root);
+	auto root_element = std::make_unique<xmlpp::Element>(root);
 	auto body = root_element->find("//body");
 
 	if (body.empty()) {
@@ -610,7 +611,11 @@ std::string get_post_text_from_json(std::string& str)
 	}
 
 	auto body_element = reinterpret_cast<xmlpp::Element *>(body[0]);
-	return get_post_text(body_element);
+	text = get_post_text(body_element);
+
+	xmlFreeDoc(doc);
+
+	return text;
 }
 
 std::string get_post_info(nlohmann::json& post, bool catalogue = false)
