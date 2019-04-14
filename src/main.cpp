@@ -695,9 +695,6 @@ int main(int argc, char **argv)
 	std::string arg_page;
 	bool arg_catalogue = false;
 
-	htmlDocPtr doc = nullptr;
-	xmlNode *root = nullptr;
-
 	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
 		switch (copts) {
 			case 'b': arg_board = optarg;
@@ -741,8 +738,6 @@ int main(int argc, char **argv)
 	//get_catalogue(catalog_json);
 
 	// TODO: take care memory leaks
-	// delete root_element;
-	xmlFreeDoc(doc);
 
 	return EXIT_SUCCESS;
 }
