@@ -621,16 +621,16 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 {
 	std::string info;
 
-	try {
+	if (!post["name"].empty()) {
 		info += post["name"].get<std::string>() + " ";
-	} catch (nlohmann::detail::type_error&) {
+	} else {
 		info += post["trip"].get<std::string>() + " ";
 	}
 
-	try {
+	if (!post["filename"].empty()) {
 		info += post["filename"].get<std::string>() + post["ext"].get<std::string>();
 		info += " (" + post["w"].dump() + "x" + post["h"].dump() + ") ";
-	} catch (nlohmann::detail::type_error&) {
+	} else {
 		if (catalogue) {
 			info += "<file deleted> ";
 		}
@@ -639,9 +639,9 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 	info += post["now"].get<std::string>() + " ";
 	info += post["no"].dump() + "\n";
 
-	try {
+	if (!post["sub"].empty()) {
 		info += post["sub"].get<std::string>();
-	} catch (nlohmann::detail::type_error&) {
+	} else {
 		if (catalogue) {
 			info += "<empty title>";
 		}
@@ -655,13 +655,13 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 		info += "Media: http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>() + "\n";
 	}
 
-	try {
+	if (!post["com"].empty()) {
 		// get string and replace <wbr> with empty string
 		auto op = post["com"].get<std::string>();
 		_replace(op, "<wbr>", "");
 
 		info += get_post_text_from_json(op);
-	} catch (nlohmann::detail::type_error&) {
+	} else {
 		info += "<empty body>\n\n";
 	}
 
@@ -723,7 +723,6 @@ int main(int argc, char **argv)
 	}
 
 	if (!arg_thread.empty()) {
-		//website = website + "thread/" + arg_thread + ".json";
 		website = "http://a.4cdn.org/" + arg_board + "/thread/" + arg_thread + ".json";
 
 		auto buffer = download_html(website.c_str());
