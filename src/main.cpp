@@ -215,11 +215,6 @@ bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **roo
 	return true;
 }
 
-bool remove_file(std::string& path)
-{
-	return std::filesystem::remove(path);
-}
-
 bool download_img(Glib::ustring& _url)
 {
 	auto url = std::string(_url);
@@ -272,7 +267,7 @@ bool download_img(Glib::ustring& _url)
 			std::printf("Trying to fetch the png...\n");
 
 			// delete version of file that is not downloadable
-			remove_file(file_name);
+			std::filesystem::remove(file_name);
 
 			// change url from jpg to png
 			auto period = url.find_last_of('.');
@@ -283,7 +278,7 @@ bool download_img(Glib::ustring& _url)
 		}
 
 		// delete if the file ultimately isnt downloadble
-		remove_file(file_name);
+		std::filesystem::remove(file_name);
 
 		return false;
 	}
