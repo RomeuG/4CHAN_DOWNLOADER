@@ -215,7 +215,7 @@ bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **roo
 	return true;
 }
 
-bool download_img(Glib::ustring& _url)
+bool download_media(Glib::ustring& _url)
 {
 	auto url = std::string(_url);
 
@@ -274,7 +274,7 @@ bool download_img(Glib::ustring& _url)
 			url.replace(period + 1, url.size() - 1, "png");
 
 			Glib::ustring new_url = Glib::ustring(url);
-			download_img(new_url);
+			download_media(new_url);
 		}
 
 		// delete if the file ultimately isnt downloadble
@@ -334,10 +334,10 @@ bool download_img_thumb(Glib::ustring& url)
 }
 
 // TODO receive NODE* as input instead of string
-void download_imgs(std::vector<std::string>& list)
+void download_medias(std::vector<std::string>& list)
 {
 	for (std::string& url : list) {
-		//auto res = download_img(url);
+		//auto res = download_media(url);
 		auto res = true;
 		if (!res) {
 			std::printf("Error downloading image from %s\n", url.c_str());
