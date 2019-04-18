@@ -12,25 +12,6 @@
 
 #include "json.hpp"
 
-// XPATH constants
-#define XPATH_ALL_IMGS "//img"
-#define XPATH_TITLE "//title"
-#define XPATH_IMG_THUMB "//a/img"
-#define XPATH_A_CLASS_THUMB "//a[@class='fileThumb']"
-#define XPATH_TITLE_AND_IMGS "//title | //a/img"
-#define XPATH_A_BEFORE_IMG "//img/preceding::a[1]"
-
-#define XPATH_BLOCKQUOTE_TEXT "//blockquote[@class='postMessage']/text()"
-
-#define XPATH_OP_POST "//div[@class='post op']"
-#define XPATH_REPLY_POST "//div[@class='post reply']"
-
-// http://a.4cdn.org/g/catalog.json
-#define XPATH_THREAD "//div[@class='thread']"
-
-//auto replies = root->find("//blockquote[@class='postMessage']/text()");
-//auto replies = root->find("//blockquote[@class='postMessage']");
-
 namespace Constants {
 	const std::unordered_map<std::string, std::string> chan_map{
 			{"3",    "https://boards.4channel.org/3/"},
