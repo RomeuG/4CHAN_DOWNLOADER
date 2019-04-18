@@ -200,17 +200,6 @@ bool download_media(Glib::ustring& _url)
 {
 	auto url = std::string(_url);
 
-	// erase leading //
-	if (url[0] == '/' && url[1] == '/') {
-		url.erase(0, 2);
-	}
-
-	// get url for the original sized image
-	auto s = url.find_last_of('s');
-	if (s != std::string::npos) {
-		url.erase(url.begin() + s);
-	}
-
 	auto file_name = split_str(url, '/').back();
 	auto file_type = split_str(url, '.').back();
 
@@ -231,6 +220,7 @@ bool download_media(Glib::ustring& _url)
 	if (rc) {
 		std::printf("Failed to download: %s\n", url.c_str());
 
+		curl_easy_cleanup(curl_ctx);
 		std::fclose(fp);
 		return false;
 	}
@@ -244,21 +234,7 @@ bool download_media(Glib::ustring& _url)
 		curl_easy_cleanup(curl_ctx);
 		std::fclose(fp);
 
-		if (file_type != "gif" && file_type == "jpg") {
-			std::printf("Trying to fetch the png...\n");
-
-			// delete version of file that is not downloadable
-			std::filesystem::remove(file_name);
-
-			// change url from jpg to png
-			auto period = url.find_last_of('.');
-			url.replace(period + 1, url.size() - 1, "png");
-
-			Glib::ustring new_url = Glib::ustring(url);
-			download_media(new_url);
-		}
-
-		// delete if the file ultimately isnt downloadble
+		// remove file because its useless
 		std::filesystem::remove(file_name);
 
 		return false;
@@ -270,18 +246,13 @@ bool download_media(Glib::ustring& _url)
 	return true;
 }
 
+// TODO: change url to actually get the thumbnail
 bool download_img_thumb(Glib::ustring& url)
 {
 	auto file_name = split_str(url, '/').back();
 	auto file_type = split_str(url, '.').back();
 
 	auto fp = std::fopen(file_name.c_str(), "wb");
-
-	// erase leading //
-	if (url[0] == '/' && url[1] == '/') {
-		url.erase(0, 2);
-	}
-
 	if (!fp) {
 		std::printf("Failed to create file on the disk\n");
 		return false;
@@ -297,6 +268,10 @@ bool download_img_thumb(Glib::ustring& url)
 	CURLcode rc = curl_easy_perform(curl_ctx);
 	if (rc) {
 		std::printf("Failed to download: %s\n", url.c_str());
+
+		curl_easy_cleanup(curl_ctx);
+		std::fclose(fp);
+
 		return false;
 	}
 
@@ -305,6 +280,13 @@ bool download_img_thumb(Glib::ustring& url)
 
 	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
 		std::printf("Response code: %d\n", res_code);
+
+		curl_easy_cleanup(curl_ctx);
+		std::fclose(fp);
+
+		// remove file because its useless
+		std::filesystem::remove(file_name);
+
 		return false;
 	}
 
