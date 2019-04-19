@@ -653,21 +653,19 @@ int main(int argc, char **argv)
 	std::string arg_page;
 	bool arg_catalogue = false;
 
-	while ((copts = getopt(argc, argv, "b:chp:t:")) != -1) {
+	while ((copts = getopt(argc, argv, "b:ch:t:")) != -1) {
 		switch (copts) {
-			case 'b': arg_board = optarg;
-				break;
-			case 'c': arg_catalogue = true;
-				break;
-			case 'h':
-				// TODO
-				std::printf("Usage: ./program etc");
-				break;
-			case 'p': arg_page = optarg;
-				break;
-			case 't': arg_thread = optarg;
-				break;
-			default: break;
+		case 'b': arg_board = optarg;
+			break;
+		case 'c': arg_catalogue = true;
+			break;
+		case 'h':
+			// TODO
+			std::printf("Usage: ./program etc");
+			break;
+		case 't': arg_thread = optarg;
+			break;
+		default: break;
 		}
 	}
 
