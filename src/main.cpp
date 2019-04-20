@@ -139,7 +139,7 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
 }
 
-std::string download_html(const char *url)
+std::string download_json(const char *url)
 {
 	CURL *curl_ctx = nullptr;
 	CURLcode code;
@@ -206,16 +206,17 @@ bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **roo
 	return true;
 }
 
-bool download_media(Glib::ustring& _url)
+bool download_media(std::string& url, std::filesystem::path& path)
 {
-	auto url = std::string(_url);
+	// dirty hack because core is being dumped for
+	// no apparent reason if this is not done.
+	// stack smashing happens too.
+	// probably a problem with std::filesystem::path ?
+	std::string file = std::string(path.c_str());
 
-	auto file_name = split_str(url, '/').back();
-	auto file_type = split_str(url, '.').back();
-
-	auto fp = std::fopen(file_name.c_str(), "wb");
+	auto fp = std::fopen(file.c_str(), "wb");
 	if (!fp) {
-		std::printf("Failed to create file on the disk\n");
+		std::printf("Failed to create file on the disk: %d\n", errno);
 		return false;
 	}
 
@@ -245,7 +246,7 @@ bool download_media(Glib::ustring& _url)
 		std::fclose(fp);
 
 		// remove file because its useless
-		std::filesystem::remove(file_name);
+		std::filesystem::remove(path);
 
 		return false;
 	}
@@ -585,7 +586,7 @@ std::string get_post_text_from_json(std::string& str)
 	return text;
 }
 
-std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalogue = false)
+std::string get_post_info(nlohmann::json& post, struct args_t& args)
 {
 	std::string info;
 
@@ -599,7 +600,7 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalo
 		info += post["filename"].get<std::string>() + post["ext"].get<std::string>();
 		info += " (" + post["w"].dump() + "x" + post["h"].dump() + ") ";
 	} else {
-		if (catalogue) {
+		if (args.catalogue) {
 			info += "<file deleted> ";
 		}
 	}
@@ -610,12 +611,12 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalo
 	if (!post["sub"].empty()) {
 		info += post["sub"].get<std::string>();
 	} else {
-		if (catalogue) {
+		if (args.catalogue) {
 			info += "<empty title>";
 		}
 	}
 
-	if (catalogue) {
+	if (args.catalogue) {
 		info += " (" + post["replies"].dump() + " Replies, " + post["images"].dump() + " Images)\n";
 	}
 
@@ -624,8 +625,17 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalo
 
 		if (args.media_download) {
 			auto media_url = "http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>();
-			//std::filesystem::exists(file_status __s)
-			//download_media(media_url);
+
+			if (!std::filesystem::exists(args.thread)) {
+				if (!std::filesystem::create_directory(args.thread)) {
+					std::printf("Error creating directory.\n");
+				}
+			}
+
+			auto absolute_path = std::filesystem::absolute(args.thread);
+			absolute_path.append(post["tim"].dump() + post["ext"].get<std::string>());
+
+			download_media(media_url, absolute_path);
 		}
 	}
 
@@ -645,7 +655,7 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalo
 void get_thread(nlohmann::json& catalogue_json, struct args_t& args)
 {
 	for (nlohmann::json& post : catalogue_json["posts"]) {
-		std::string thread_info = get_post_info(post, args, false);
+		std::string thread_info = get_post_info(post, args);
 		std::printf("%s\n", thread_info.c_str());
 	}
 }
@@ -654,7 +664,7 @@ void get_catalogue(nlohmann::json& catalogue_json, struct args_t& args)
 {
 	for (auto& page : catalogue_json) {
 		for (nlohmann::json& thread : page["threads"]) {
-			std::string thread_info = get_post_info(thread, args, true);
+			std::string thread_info = get_post_info(thread, args);
 			std::printf("%s\n", thread_info.c_str());
 		}
 	}
@@ -667,7 +677,7 @@ int main(int argc, char **argv)
 
 	struct args_t args;
 
-	while ((copts = getopt(argc, argv, "b:chi:I:t:")) != -1) {
+	while ((copts = getopt(argc, argv, "b:chi:It:")) != -1) {
 		switch (copts) {
 		case 'b': args.board = optarg;
 			break;
@@ -700,7 +710,7 @@ int main(int argc, char **argv)
 	if (!args.thread.empty()) {
 		website = "http://a.4cdn.org/" + args.board + "/thread/" + args.thread + ".json";
 
-		auto buffer = download_html(website.c_str());
+		auto buffer = download_json(website.c_str());
 		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
 		get_thread(buffer_json, args);
 	}
@@ -708,7 +718,7 @@ int main(int argc, char **argv)
 	if (args.catalogue) {
 		website = "http://a.4cdn.org/" + args.board + "/catalog.json";
 
-		auto buffer = download_html(website.c_str());
+		auto buffer = download_json(website.c_str());
 		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
 		get_catalogue(buffer_json, args);
 	}
