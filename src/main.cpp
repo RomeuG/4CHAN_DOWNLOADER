@@ -725,6 +725,5 @@ int main(int argc, char **argv)
 		get_thread(buffer_json, args);
 	}
 
-    // TODO: take care memory leaks
 	return EXIT_SUCCESS;
 }
