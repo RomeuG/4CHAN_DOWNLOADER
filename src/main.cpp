@@ -86,6 +86,16 @@ namespace Constants {
 	};
 }
 
+struct args_t {
+	std::string board;
+	std::string thread;
+	std::string page;
+	std::string media;
+
+	bool catalogue = false;
+	bool media_download = false;
+};
+
 std::vector<std::string> split_str(const std::string& string, const char delimiter)
 {
 	std::vector<std::string> results;
@@ -575,7 +585,7 @@ std::string get_post_text_from_json(std::string& str)
 	return text;
 }
 
-std::string get_post_info(nlohmann::json& post, bool catalogue = false)
+std::string get_post_info(nlohmann::json& post, struct args_t& args, bool catalogue = false)
 {
 	std::string info;
 
@@ -611,6 +621,12 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 
 	if (!post["tim"].empty()) {
 		info += "Media: http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>() + "\n";
+
+		if (args.media_download) {
+			auto media_url = "http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>();
+			//std::filesystem::exists(file_status __s)
+			//download_media(media_url);
+		}
 	}
 
 	if (!post["com"].empty()) {
@@ -626,19 +642,19 @@ std::string get_post_info(nlohmann::json& post, bool catalogue = false)
 	return info;
 }
 
-void get_thread(nlohmann::json& catalogue_json)
+void get_thread(nlohmann::json& catalogue_json, struct args_t& args)
 {
 	for (nlohmann::json& post : catalogue_json["posts"]) {
-		std::string thread_info = get_post_info(post);
+		std::string thread_info = get_post_info(post, args, false);
 		std::printf("%s\n", thread_info.c_str());
 	}
 }
 
-void get_catalogue(nlohmann::json& catalogue_json)
+void get_catalogue(nlohmann::json& catalogue_json, struct args_t& args)
 {
 	for (auto& page : catalogue_json) {
 		for (nlohmann::json& thread : page["threads"]) {
-			std::string thread_info = get_post_info(thread, true);
+			std::string thread_info = get_post_info(thread, args, true);
 			std::printf("%s\n", thread_info.c_str());
 		}
 	}
@@ -647,30 +663,33 @@ void get_catalogue(nlohmann::json& catalogue_json)
 int main(int argc, char **argv)
 {
 	int copts;
+	std::string website;
 
-	std::string arg_board;
-	std::string arg_thread;
-	std::string arg_page;
-	bool arg_catalogue = false;
+	struct args_t args;
 
-	while ((copts = getopt(argc, argv, "b:ch:t:")) != -1) {
+	while ((copts = getopt(argc, argv, "b:chi:I:t:")) != -1) {
 		switch (copts) {
-		case 'b': arg_board = optarg;
+		case 'b': args.board = optarg;
 			break;
-		case 'c': arg_catalogue = true;
+		case 'c': args.catalogue = true;
 			break;
 		case 'h':
 			// TODO
 			std::printf("Usage: ./program etc");
 			break;
-		case 't': arg_thread = optarg;
+		case 'i':
+			args.media = optarg;
+			break;
+		case 'I':
+			args.media_download = true;
+			break;
+		case 't': args.thread = optarg;
 			break;
 		default: break;
 		}
 	}
 
-	std::string website;
-	auto board = Constants::chan_map.find(arg_board);
+	auto board = Constants::chan_map.find(args.board);
 	if (board == Constants::chan_map.cend()) {
 		std::printf("Invalid imageboard.\n");
 		exit(EXIT_FAILURE);
@@ -678,20 +697,20 @@ int main(int argc, char **argv)
 		website = board->second;
 	}
 
-	if (!arg_thread.empty()) {
-		website = "http://a.4cdn.org/" + arg_board + "/thread/" + arg_thread + ".json";
+	if (!args.thread.empty()) {
+		website = "http://a.4cdn.org/" + args.board + "/thread/" + args.thread + ".json";
 
 		auto buffer = download_html(website.c_str());
 		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
-		get_thread(buffer_json);
+		get_thread(buffer_json, args);
 	}
 
-	if (arg_catalogue) {
-		website = "http://a.4cdn.org/" + arg_board + "/catalog.json";
+	if (args.catalogue) {
+		website = "http://a.4cdn.org/" + args.board + "/catalog.json";
 
 		auto buffer = download_html(website.c_str());
 		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
-		get_catalogue(buffer_json);
+		get_catalogue(buffer_json, args);
 	}
 	// TODO: take care memory leaks
 
