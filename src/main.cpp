@@ -635,7 +635,9 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args)
 			auto absolute_path = std::filesystem::absolute(args.thread);
 			absolute_path.append(post["tim"].dump() + post["ext"].get<std::string>());
 
-			download_media(media_url, absolute_path);
+			if (!std::filesystem::exists(absolute_path)) {
+				download_media(media_url, absolute_path);
+			}
 		}
 	}
 
