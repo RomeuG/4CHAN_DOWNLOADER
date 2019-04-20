@@ -621,10 +621,10 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args)
 	}
 
 	if (!post["tim"].empty()) {
-		info += "Media: http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>() + "\n";
+		info += "Media: http://i.4cdn.org/" + args.board + "/" + post["tim"].dump() + post["ext"].get<std::string>() + "\n";
 
 		if (args.media_download) {
-			auto media_url = "http://i.4cdn.org/g/" + post["tim"].dump() + post["ext"].get<std::string>();
+			auto media_url = "http://i.4cdn.org/" + args.board + "/" + post["tim"].dump() + post["ext"].get<std::string>();
 
 			if (!std::filesystem::exists(args.thread)) {
 				if (!std::filesystem::create_directory(args.thread)) {
