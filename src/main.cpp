@@ -709,6 +709,14 @@ int main(int argc, char **argv)
 		website = board->second;
 	}
 
+	if (args.catalogue) {
+		website = "http://a.4cdn.org/" + args.board + "/catalog.json";
+
+		auto buffer = download_json(website.c_str());
+		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
+		get_catalogue(buffer_json, args);
+	}
+
 	if (!args.thread.empty()) {
 		website = "http://a.4cdn.org/" + args.board + "/thread/" + args.thread + ".json";
 
@@ -717,14 +725,6 @@ int main(int argc, char **argv)
 		get_thread(buffer_json, args);
 	}
 
-	if (args.catalogue) {
-		website = "http://a.4cdn.org/" + args.board + "/catalog.json";
-
-		auto buffer = download_json(website.c_str());
-		nlohmann::json buffer_json = nlohmann::json::parse(buffer);
-		get_catalogue(buffer_json, args);
-	}
-	// TODO: take care memory leaks
-
+    // TODO: take care memory leaks
 	return EXIT_SUCCESS;
 }
