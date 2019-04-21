@@ -643,10 +643,10 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args)
 
 	if (!post["com"].empty()) {
 		// get string and replace <wbr> with empty string
-		auto op = post["com"].get<std::string>();
-		_replace(op, "<wbr>", "");
+		auto post_text = post["com"].get<std::string>();
+		_replace(post_text, "<wbr>", "");
 
-		info += get_post_text_from_json(op);
+		info += get_post_text_from_json(post_text);
 	} else {
 		info += "<empty body>\n\n";
 	}
