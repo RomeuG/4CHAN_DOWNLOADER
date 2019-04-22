@@ -454,7 +454,12 @@ auto get_catalogue(nlohmann::json& catalogue_json, struct args_t& args) -> void
 
 auto usage(char *bin_name) -> void
 {
-	std::printf("Usage: ./%s etc", bin_name);
+	std::printf("Usage: %s [ARGS]\n", bin_name);
+	std::printf("\t-b: board\n");
+	std::printf("\t-c: get catalogue\n");
+	std::printf("\t-h: print this message\n");
+	std::printf("\t-i: download media from thread\n");
+	std::printf("\t-t: thread id\n");
 }
 
 auto main(int argc, char **argv) -> int
@@ -464,7 +469,7 @@ auto main(int argc, char **argv) -> int
 
 	struct args_t args;
 
-	while ((copts = getopt(argc, argv, "b:chi:It:")) != -1) {
+	while ((copts = getopt(argc, argv, "b:chit:")) != -1) {
 		switch (copts) {
 		case 'b': args.board = optarg;
 			break;
@@ -473,11 +478,8 @@ auto main(int argc, char **argv) -> int
 		case 'h':
 			// TODO
 			usage(argv[0]);
-			break;
+			return EXIT_SUCCESS;
 		case 'i':
-			args.media = optarg;
-			break;
-		case 'I':
 			args.media_download = true;
 			break;
 		case 't': args.thread = optarg;
