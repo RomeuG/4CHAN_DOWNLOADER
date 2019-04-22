@@ -476,7 +476,6 @@ auto main(int argc, char **argv) -> int
 		case 'c': args.catalogue = true;
 			break;
 		case 'h':
-			// TODO
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		case 'i':
