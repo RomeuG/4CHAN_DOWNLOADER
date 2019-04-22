@@ -96,7 +96,7 @@ struct args_t {
 	bool media_download = false;
 };
 
-std::vector<std::string> split_str(const std::string& string, const char delimiter)
+auto split_str(const std::string& string, const char delimiter) -> std::vector<std::string>
 {
 	std::vector<std::string> results;
 	boost::split(results, string, [delimiter](char c) { return c == delimiter; });
@@ -104,7 +104,7 @@ std::vector<std::string> split_str(const std::string& string, const char delimit
 	return results;
 }
 
-void _replace(std::string& str, const std::string_view from, const std::string_view to)
+auto _replace(std::string& str, const std::string_view from, const std::string_view to) -> void
 {
 	if (from.empty()) {
 		return;
@@ -117,7 +117,7 @@ void _replace(std::string& str, const std::string_view from, const std::string_v
 	}
 }
 
-static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data)
+static auto curlcb_html(char *data, size_t size, size_t nmemb, std::string *writer_data) -> std::size_t
 {
 	if (writer_data == nullptr) {
 		return 0;
@@ -128,7 +128,7 @@ static std::size_t curlcb_html(char *data, size_t size, size_t nmemb, std::strin
 	return size * nmemb;
 }
 
-static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
+static auto curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata) -> std::size_t
 {
 	FILE *stream = (FILE *) userdata;
 	if (!stream) {
@@ -139,7 +139,7 @@ static size_t curlcb_img(void *ptr, size_t size, size_t nmemb, void *userdata)
 	return (std::size_t) fwrite((FILE *) ptr, size, nmemb, stream);
 }
 
-std::string download_json(const char *url)
+auto download_json(const char *url) -> std::string
 {
 	CURL *curl_ctx = nullptr;
 	CURLcode code;
@@ -164,31 +164,31 @@ std::string download_json(const char *url)
 	curl_easy_setopt(curl_ctx, CURLOPT_URL, url);
 	curl_easy_setopt(curl_ctx, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(curl_ctx, CURLOPT_FOLLOWLOCATION, 0L);
-	curl_easy_setopt(curl_ctx, CURLOPT_WRITEFUNCTION, curlcb_html);
-	curl_easy_setopt(curl_ctx, CURLOPT_WRITEDATA, &buffer);
+	 curl_easy_setopt(curl_ctx, CURLOPT_WRITEFUNCTION, curlcb_html);
+	 curl_easy_setopt(curl_ctx, CURLOPT_WRITEDATA, &buffer);
 
-	code = curl_easy_perform(curl_ctx);
+	 code = curl_easy_perform(curl_ctx);
 
-	if (code != CURLE_OK) {
-		std::printf("Failed to get '%s' [%s]\n", url, curl_error_buffer);
-		exit(EXIT_FAILURE);
-	}
+	 if (code != CURLE_OK) {
+		 std::printf("Failed to get '%s' [%s]\n", url, curl_error_buffer);
+		 exit(EXIT_FAILURE);
+	 }
 
-	auto res_code = 0;
-	curl_easy_getinfo(curl_ctx, CURLINFO_RESPONSE_CODE, &res_code);
+	 auto res_code = 0;
+	 curl_easy_getinfo(curl_ctx, CURLINFO_RESPONSE_CODE, &res_code);
 
-	if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
-		std::printf("Response code: %d\n", res_code);
-		return "";
-	}
+	 if (!((res_code == 200 || res_code == 201 || res_code == 403))) {
+		 std::printf("Response code: %d\n", res_code);
+		 return "";
+	 }
 
-	curl_slist_free_all(headers);
-	curl_easy_cleanup(curl_ctx);
+	 curl_slist_free_all(headers);
+	 curl_easy_cleanup(curl_ctx);
 
-	return buffer;
-}
+	 return buffer;
+ }
 
-bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **root)
+auto convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **root) -> bool
 {
 	*document = htmlReadMemory(buffer.c_str(), buffer.size(), nullptr, nullptr, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
 	if (*document == nullptr) {
@@ -206,7 +206,7 @@ bool convert_to_xmltree(std::string& buffer, htmlDocPtr *document, xmlNode **roo
 	return true;
 }
 
-bool download_media(std::string& url, std::filesystem::path& path)
+auto download_media(std::string& url, std::filesystem::path& path) -> bool
 {
 	// dirty hack because core is being dumped for
 	// no apparent reason if this is not done.
@@ -258,7 +258,7 @@ bool download_media(std::string& url, std::filesystem::path& path)
 }
 
 // TODO: change url to actually get the thumbnail
-bool download_img_thumb(Glib::ustring& url)
+auto download_img_thumb(Glib::ustring& url) -> bool
 {
 	auto file_name = split_str(url, '/').back();
 	auto file_type = split_str(url, '.').back();
@@ -308,7 +308,7 @@ bool download_img_thumb(Glib::ustring& url)
 }
 
 // TODO receive NODE* as input instead of string
-void download_medias(std::vector<std::string>& list)
+auto download_medias(std::vector<std::string>& list) -> void
 {
 	for (std::string& url : list) {
 		//auto res = download_media(url);
@@ -319,7 +319,7 @@ void download_medias(std::vector<std::string>& list)
 	}
 }
 
-void traverse_dom_trees(xmlNode *a_node)
+auto traverse_dom_trees(xmlNode *a_node) -> void
 {
 	xmlNode *cur_node = nullptr;
 
@@ -338,7 +338,7 @@ void traverse_dom_trees(xmlNode *a_node)
 	}
 }
 
-xmlNode *htmlparse_get_body(xmlNode *root_node)
+auto htmlparse_get_body(xmlNode *root_node) -> xmlNode*
 {
 	xmlNode *possible_body = root_node->children->next;
 	if (strncmp((char *) possible_body->name, "body", 5) == 0) {
@@ -348,7 +348,7 @@ xmlNode *htmlparse_get_body(xmlNode *root_node)
 	return nullptr;
 }
 
-void print_xml(xmlNode *element)
+auto print_xml(xmlNode *element) -> void
 {
 	xmlBufferPtr _buffer = xmlBufferCreate();
 	xmlNodeDump(_buffer, nullptr, element, 2, 1);
@@ -357,7 +357,7 @@ void print_xml(xmlNode *element)
 	xmlBufferFree(_buffer);
 }
 
-xmlpp::Element *get_post_header_ptr(xmlpp::Element *element)
+auto get_post_header_ptr(xmlpp::Element *element) -> xmlpp::Element*
 {
 	auto children = element->get_children();
 	for (xmlpp::Node *& child : children) {
@@ -370,7 +370,7 @@ xmlpp::Element *get_post_header_ptr(xmlpp::Element *element)
 	return nullptr;
 }
 
-xmlpp::Element *get_post_file_ptr(xmlpp::Element *element)
+auto get_post_file_ptr(xmlpp::Element *element) -> xmlpp::Element*
 {
 	auto children = element->get_children();
 	for (xmlpp::Node *& child : children) {
@@ -384,7 +384,7 @@ xmlpp::Element *get_post_file_ptr(xmlpp::Element *element)
 	return nullptr;
 }
 
-std::string get_post_header(xmlpp::Element *element)
+auto get_post_header(xmlpp::Element *element) -> std::string
 {
 	std::string header;
 	auto header_element = get_post_header_ptr(element);
@@ -405,27 +405,27 @@ std::string get_post_header(xmlpp::Element *element)
 			auto datetime_element = reinterpret_cast<xmlpp::TextNode *>(child_element->get_first_child());
 
 			if (datetime_element) {
-				header += datetime_element->get_content() + " ";
-			}
-		}
+				 header += datetime_element->get_content() + " ";
+			 }
+		 }
 
-		if (child_element->get_attribute_value("class") == "postNum desktop") {
-			auto postnum_children = child_element->get_children();
-			auto postnum_child = std::next(postnum_children.begin(), 1);
+		 if (child_element->get_attribute_value("class") == "postNum desktop") {
+			 auto postnum_children = child_element->get_children();
+			 auto postnum_child = std::next(postnum_children.begin(), 1);
 
-			auto postnum_element = reinterpret_cast<xmlpp::Element *>(*postnum_child);
-			auto postnum = reinterpret_cast<xmlpp::TextNode *>(postnum_element->get_first_child());
+			 auto postnum_element = reinterpret_cast<xmlpp::Element *>(*postnum_child);
+			 auto postnum = reinterpret_cast<xmlpp::TextNode *>(postnum_element->get_first_child());
 
-			if (postnum) {
-				header += postnum->get_content();
-			}
-		}
-	});
+			 if (postnum) {
+				 header += postnum->get_content();
+			 }
+		 }
+	 });
 
-	return header;
-}
+	 return header;
+ }
 
-std::string get_post_file(xmlpp::Element *element)
+auto get_post_file(xmlpp::Element *element) -> std::string
 {
 	std::string file;
 	std::string file_link;
@@ -469,7 +469,7 @@ std::string get_post_file(xmlpp::Element *element)
 }
 
 // TODO: shorten function
-std::string get_post_text(xmlpp::Element *element)
+auto get_post_text(xmlpp::Element *element) -> std::string
 {
 	std::string post;
 
@@ -558,7 +558,7 @@ std::string get_post_text(xmlpp::Element *element)
 	return post;
 }
 
-std::string get_post_text_from_json(std::string& str)
+auto get_post_text_from_json(std::string& str) -> std::string
 {
 	std::string text;
 
@@ -575,18 +575,18 @@ std::string get_post_text_from_json(std::string& str)
 	auto body = root_element->find("//body");
 
 	if (body.empty()) {
-		return "\n\n";
-	}
+		 return "\n\n";
+	 }
 
-	auto body_element = reinterpret_cast<xmlpp::Element *>(body[0]);
-	text = get_post_text(body_element);
+	 auto body_element = reinterpret_cast<xmlpp::Element *>(body[0]);
+	 text = get_post_text(body_element);
 
-	xmlFreeDoc(doc);
+	 xmlFreeDoc(doc);
 
-	return text;
+	 return text;
 }
 
-std::string get_post_info(nlohmann::json& post, struct args_t& args)
+auto get_post_info(nlohmann::json& post, struct args_t& args) -> std::string
 {
 	std::string info;
 
@@ -654,7 +654,7 @@ std::string get_post_info(nlohmann::json& post, struct args_t& args)
 	return info;
 }
 
-void get_thread(nlohmann::json& catalogue_json, struct args_t& args)
+auto get_thread(nlohmann::json& catalogue_json, struct args_t& args) -> void
 {
 	for (nlohmann::json& post : catalogue_json["posts"]) {
 		std::string thread_info = get_post_info(post, args);
@@ -662,7 +662,7 @@ void get_thread(nlohmann::json& catalogue_json, struct args_t& args)
 	}
 }
 
-void get_catalogue(nlohmann::json& catalogue_json, struct args_t& args)
+auto get_catalogue(nlohmann::json& catalogue_json, struct args_t& args) -> void
 {
 	for (auto& page : catalogue_json) {
 		for (nlohmann::json& thread : page["threads"]) {
@@ -672,7 +672,12 @@ void get_catalogue(nlohmann::json& catalogue_json, struct args_t& args)
 	}
 }
 
-int main(int argc, char **argv)
+auto usage(char *bin_name) -> void
+{
+	std::printf("Usage: ./%s etc", bin_name);
+}
+
+auto main(int argc, char **argv) -> int
 {
 	int copts;
 	std::string website;
@@ -687,7 +692,7 @@ int main(int argc, char **argv)
 			break;
 		case 'h':
 			// TODO
-			std::printf("Usage: ./program etc");
+			usage(argv[0]);
 			break;
 		case 'i':
 			args.media = optarg;
