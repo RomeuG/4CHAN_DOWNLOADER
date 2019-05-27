@@ -389,10 +389,10 @@ auto get_post_info(nlohmann::json& post, struct args_t& args) -> std::string
 	info += post["no"].dump() + "\n";
 
 	if (!post["sub"].empty()) {
-		info += post["sub"].get<std::string>();
+		info += post["sub"].get<std::string>() + "\n";
 	} else {
 		if (args.catalogue) {
-			info += "<empty title>";
+			info += "<empty title>\n";
 		}
 	}
 
