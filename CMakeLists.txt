@@ -18,13 +18,15 @@ include_directories(/usr/lib/glibmm-2.4/include)
 include_directories(/usr/include/glib-2.0)
 include_directories(/usr/lib/glib-2.0/include)
 
-include_directories(lib/json)
+include_directories(lib/4chan-sdk/include)
+include_directories(lib/4chan-sdk/lib/json)
 
-set(LIBSTDCXX_FS_LIBRARIES -lstdc++fs)
-set(CMAKE_CXX_FLAGS " -O0 -ggdb3 -lxml++-3.0 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lglib-2.0 -lsigc-2.0 -lcurl")
+# set(LIBSTDCXX_FS_LIBRARIES -lstdc++fs)
+set(CMAKE_CXX_FLAGS " -O0 -ggdb3 -Wno-unused-command-line-argument -lxml++-3.0 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lglib-2.0 -lsigc-2.0 -lcurl -ltbb")
 
 add_executable(4CHAN_DOWNLOADER
         src/main.cpp
         README.md)
 
-target_link_libraries(4CHAN_DOWNLOADER ${LIBSTDCXX_FS_LIBRARIES})
+target_link_libraries(4CHAN_DOWNLOADER "-L../lib/4chan-sdk/build" lib4chansdk.so)
+# target_link_libraries(4CHAN_DOWNLOADER ${LIBSTDCXX_FS_LIBRARIES})
