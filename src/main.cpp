@@ -11,7 +11,7 @@ auto get_catalog_json() -> std::string
             result = json;
         },
         [](std::string const& e) {
-            std::printf("Exception: %s\n");
+            std::printf("Exception: %s\n", e.c_str());
         });
 
     return result;
@@ -27,7 +27,7 @@ auto get_thread_json() -> std::string
             result = json;
         },
         [](std::string const& e) {
-            std::printf("Exception %s\n");
+            std::printf("Exception %s\n", e.c_str());
         });
 
     return result;
