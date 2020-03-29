@@ -68,12 +68,12 @@ static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> erro
     return 0;
 }
 
-auto get_catalog_json() -> std::string
+auto get_catalog_json(std::string const& board) -> std::string
 {
     std::string result = "";
 
     channer::get_catalog_json(
-        "g",
+        board,
         [&result](std::string json) {
             result = json;
         },
@@ -84,12 +84,12 @@ auto get_catalog_json() -> std::string
     return result;
 }
 
-auto get_thread_json() -> std::string
+auto get_thread_json(std::string const& board, std::string const& thread) -> std::string
 {
     std::string result = "";
 
     channer::get_thread_json(
-        "g", "",
+        board, thread,
         [&result](std::string json) {
             result = json;
         },
@@ -100,12 +100,36 @@ auto get_thread_json() -> std::string
     return result;
 }
 
+auto get_catalog() -> void
+{
+    if (pargs.OptJ) {
+        std::string result = get_catalog_json(pargs.ArgC);
+        std::printf("%s\n", result.c_str());
+    } else {
+    }
+}
+
+auto get_thread() -> void
+{
+    if (pargs.OptJ) {
+        std::string result = get_thread_json(pargs.ArgB, pargs.ArgT);
+        std::printf("%s\n", result.c_str());
+    } else {
+    }
+}
+
 auto main(int argc, char** argv) -> int
 {
     static struct argp argp = { options, argp_parseopts, args_doc, doc, 0, 0, 0 };
     argp_parse(&argp, argc, argv, 0, 0, &pargs);
 
     argopts_debug();
+
+    if (pargs.OptC) {
+        get_catalog();
+    } else if (pargs.OptT) {
+        get_thread();
+    }
 
     return 0;
 }
