@@ -94,7 +94,40 @@ auto get_thread_json(std::string const& board, std::string const& thread) -> std
             result = json;
         },
         [](std::string const& e) {
-            std::printf("Exception %s\n", e.c_str());
+            std::printf("Exception: %s\n", e.c_str());
+        });
+
+    return result;
+}
+
+auto get_catalog_obj(std::string const& board) -> std::optional<Catalog>
+{
+    std::optional<Catalog> result;
+
+    channer::get_catalog(
+        board,
+        [&result](std::optional<Catalog> catalog) {
+            result = catalog;
+        },
+        [&result](std::string const& e) {
+            std::printf("Exception: %s\n", e.c_str());
+            result = std::nullopt;
+        });
+
+    return result;
+}
+
+auto get_thread_obj(std::string const& board, std::string const& thread) -> std::optional<Thread>
+{
+    std::optional<Thread> result;
+    channer::get_thread(
+        board, thread,
+        [&result](std::optional<Thread> thread) {
+            result = thread;
+        },
+        [&result](std::string const& e) {
+            std::printf("Exception: %s\n", e.c_str());
+            result = std::nullopt;
         });
 
     return result;
@@ -106,6 +139,10 @@ auto get_catalog() -> void
         std::string result = get_catalog_json(pargs.ArgC);
         std::printf("%s\n", result.c_str());
     } else {
+        auto result = get_catalog_obj(pargs.ArgC);
+        if (result.has_value()) {
+            std::printf("%p\n", &result);
+        }
     }
 }
 
@@ -115,6 +152,10 @@ auto get_thread() -> void
         std::string result = get_thread_json(pargs.ArgB, pargs.ArgT);
         std::printf("%s\n", result.c_str());
     } else {
+        auto result = get_thread_obj(pargs.ArgB, pargs.ArgT);
+        if (result.has_value()) {
+            std::printf("%p\n", &result);
+        }
     }
 }
 
