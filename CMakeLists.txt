@@ -22,7 +22,7 @@ include_directories(lib/4chan-sdk/include)
 include_directories(lib/4chan-sdk/lib/json)
 
 # set(LIBSTDCXX_FS_LIBRARIES -lstdc++fs)
-set(CMAKE_CXX_FLAGS " -O0 -ggdb3 -Wno-unused-command-line-argument -lxml++-3.0 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lglib-2.0 -lsigc-2.0 -lcurl -ltbb")
+set(CMAKE_CXX_FLAGS " -O0 -ggdb3 -Wno-unused-command-line-argument -lxml++-3.0 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lglib-2.0 -lsigc-2.0 -lcurl -ltbb -lncurses")
 
 add_executable(4CHAN_DOWNLOADER
         src/main.cpp
