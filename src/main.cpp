@@ -5,13 +5,15 @@
 #include <getopt.h>
 
 struct ArgOpts {
-    int OptJ;
-    int OptC;
-    int OptB;
-    int OptT;
-    char* ArgC;
-    char* ArgB;
-    char* ArgT;
+    int optj;
+    int optc;
+    int optb;
+    int optt;
+    int optf;
+    char* argc;
+    char* argb;
+    char* argt;
+    char* argf;
 };
 
 ArgOpts pargs = {};
@@ -26,6 +28,7 @@ static struct argp_option options[] = {
     { "catalog", 'c', "value", 0, "Get catalog." },
     { "board", 'b', "value", 0, "Board option." },
     { "thread", 't', "value", 0, "Get thread." },
+    { "file", 'f', "value", 0, "Get file." },
     { 0 }
 };
 
@@ -35,29 +38,29 @@ auto argopts_debug() -> void
                 "OptC = %d | ArgC = %s\n"
                 "OptB = %d | ArgB = %s\n"
                 "OptT = %d | ArgT = %s\n",
-                pargs.OptJ,
-                pargs.OptC, pargs.ArgC,
-                pargs.OptB, pargs.ArgB,
-                pargs.OptT, pargs.ArgT);
+                pargs.optj,
+                pargs.optc, pargs.argc,
+                pargs.optb, pargs.argb,
+                pargs.optt, pargs.argt);
 }
 
 static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> error_t
 {
     switch (key) {
         case 'j':
-            pargs.OptJ = 1;
+            pargs.optj = 1;
             break;
         case 'c':
-            pargs.OptC = 1;
-            pargs.ArgC = strdup(arg);
+            pargs.optc = 1;
+            pargs.argc = strdup(arg);
             break;
         case 'b':
-            pargs.OptB = 1;
-            pargs.ArgB = strdup(arg);
+            pargs.optb = 1;
+            pargs.argb = strdup(arg);
             break;
         case 't':
-            pargs.OptT = 1;
-            pargs.ArgT = strdup(arg);
+            pargs.optt = 1;
+            pargs.argt = strdup(arg);
             break;
         case ARGP_KEY_ARG:
             return 0;
@@ -135,11 +138,11 @@ auto get_thread_obj(std::string const& board, std::string const& thread) -> std:
 
 auto get_catalog() -> void
 {
-    if (pargs.OptJ) {
-        std::string result = get_catalog_json(pargs.ArgC);
+    if (pargs.optj) {
+        std::string result = get_catalog_json(pargs.argc);
         std::printf("%s\n", result.c_str());
     } else {
-        auto result = get_catalog_obj(pargs.ArgC);
+        auto result = get_catalog_obj(pargs.argc);
         if (result.has_value()) {
             std::printf("%p\n", &result);
         }
@@ -148,11 +151,11 @@ auto get_catalog() -> void
 
 auto get_thread() -> void
 {
-    if (pargs.OptJ) {
-        std::string result = get_thread_json(pargs.ArgB, pargs.ArgT);
+    if (pargs.optj) {
+        std::string result = get_thread_json(pargs.argb, pargs.argt);
         std::printf("%s\n", result.c_str());
     } else {
-        auto result = get_thread_obj(pargs.ArgB, pargs.ArgT);
+        auto result = get_thread_obj(pargs.argb, pargs.argt);
         if (result.has_value()) {
             std::printf("%p\n", &result);
         }
@@ -166,9 +169,9 @@ auto main(int argc, char** argv) -> int
 
     argopts_debug();
 
-    if (pargs.OptC) {
+    if (pargs.optc) {
         get_catalog();
-    } else if (pargs.OptT) {
+    } else if (pargs.optt) {
         get_thread();
     }
 
