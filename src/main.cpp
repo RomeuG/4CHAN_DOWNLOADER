@@ -1,5 +1,3 @@
-#include "curses.cpp"
-
 #include <Client.hpp>
 #include <argp.h>
 #include <cstdio>
@@ -147,7 +145,6 @@ auto get_catalog() -> void
         auto result = get_catalog_obj(pargs.argc);
         if (result.has_value()) {
             std::printf("%p\n", &result);
-            curses_catalog(result.value());
         }
     }
 }
