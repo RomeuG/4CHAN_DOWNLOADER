@@ -71,6 +71,16 @@ static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> erro
     return 0;
 }
 
+auto catalog_to_str(Catalog const& catalog) -> std::string
+{
+    return "catalog";
+}
+
+auto thread_to_str(Thread const& thread) -> std::string
+{
+    return "thread";
+}
+
 auto get_catalog_json(std::string const& board) -> std::string
 {
     std::string result = "";
@@ -144,7 +154,8 @@ auto get_catalog() -> void
     } else {
         auto result = get_catalog_obj(pargs.argc);
         if (result.has_value()) {
-            std::printf("%p\n", &result);
+            char const* converted = catalog_to_str(result.value()).c_str();
+            std::printf("%s\n", converted);
         }
     }
 }
@@ -157,7 +168,8 @@ auto get_thread() -> void
     } else {
         auto result = get_thread_obj(pargs.argb, pargs.argt);
         if (result.has_value()) {
-            std::printf("%p\n", &result);
+            char const* converted = thread_to_str(result.value()).c_str();
+            std::printf("%s\n", converted);
         }
     }
 }
