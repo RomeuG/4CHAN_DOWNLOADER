@@ -97,12 +97,28 @@ auto thread_download_files(Thread const& thread) -> void
     }
 }
 
+auto catalog_download_files(Catalog const& catalog) -> void
+{
+    for (auto& entry : catalog.entries) {
+        if (entry.file.has_value()) {
+            auto file_url = entry.file->url;
+            auto file_path = std::string(pargs.argi) + "/" + entry.file->name + entry.file->ext;
+            channer::download_media(
+                file_url, file_path,
+                [](bool success) {},
+                [](std::string const& e) {
+                    fprintf(stderr, "Exception: %s\n", e.c_str());
+                });
+        }
+    }
+}
+
 auto catalog_to_str(Catalog const& catalog) -> std::string
 {
     return "catalog";
 }
 
-auto thread_to_str(Thread const& thread) -> std::string
+auto thread_to_str(Thread const& catalog) -> std::string
 {
     return "thread";
 }
@@ -180,8 +196,12 @@ auto get_catalog() -> void
     } else {
         auto result = get_catalog_obj(pargs.argc);
         if (result.has_value()) {
-            char const* converted = catalog_to_str(result.value()).c_str();
-            fprintf(stdout, "%s\n", converted);
+            if (pargs.opti) {
+                catalog_download_files(result.value());
+            } else {
+                char const* converted = catalog_to_str(result.value()).c_str();
+                fprintf(stdout, "%s\n", converted);
+            }
         }
     }
 }
