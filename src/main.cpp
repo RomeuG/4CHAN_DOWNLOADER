@@ -1,19 +1,21 @@
 #include <Client.hpp>
 #include <argp.h>
-#include <cstdio>
-#include <cstring>
 #include <getopt.h>
+#include <stdio.h>
+#include <string.h>
 
 struct ArgOpts {
+    char* argc;
+    char* argb;
+    char* argt;
+    char* argf;
+    char* argi;
     int optj;
     int optc;
     int optb;
     int optt;
     int optf;
-    char* argc;
-    char* argb;
-    char* argt;
-    char* argf;
+    int opti;
 };
 
 ArgOpts pargs = {};
@@ -29,19 +31,23 @@ static struct argp_option options[] = {
     { "board", 'b', "value", 0, "Board option." },
     { "thread", 't', "value", 0, "Get thread." },
     { "file", 'f', "value", 0, "Get file." },
+    { "images", 'i', "value", 0, "Get images." },
     { 0 }
 };
 
 auto argopts_debug() -> void
 {
-    std::printf("OptJ = %d\n"
-                "OptC = %d | ArgC = %s\n"
-                "OptB = %d | ArgB = %s\n"
-                "OptT = %d | ArgT = %s\n",
-                pargs.optj,
-                pargs.optc, pargs.argc,
-                pargs.optb, pargs.argb,
-                pargs.optt, pargs.argt);
+    fprintf(stdout,
+            "OptJ = %d\n"
+            "OptC = %d | ArgC = %s\n"
+            "OptB = %d | ArgB = %s\n"
+            "OptT = %d | ArgT = %s\n"
+            "OptI = %d | ArgI = %s\n",
+            pargs.optj,
+            pargs.optc, pargs.argc,
+            pargs.optb, pargs.argb,
+            pargs.optt, pargs.argt,
+            pargs.opti, pargs.argi);
 }
 
 static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> error_t
@@ -62,6 +68,10 @@ static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> erro
             pargs.optt = 1;
             pargs.argt = strdup(arg);
             break;
+        case 'i':
+            pargs.opti = 1;
+            pargs.argi = strdup(arg);
+            break;
         case ARGP_KEY_ARG:
             return 0;
         default:
@@ -69,6 +79,22 @@ static auto argp_parseopts(int key, char* arg, struct argp_state* state) -> erro
     }
 
     return 0;
+}
+
+auto thread_download_files(Thread const& thread) -> void
+{
+    for (auto& post : thread.posts) {
+        if (post.file.has_value()) {
+            auto file_url = post.file->url;
+            auto file_path = std::string(pargs.argi) + "/" + post.file->name + post.file->ext;
+            channer::download_media(
+                file_url, file_path,
+                [](bool success) {},
+                [](std::string const& e) {
+                    fprintf(stderr, "Exception: %s\n", e.c_str());
+                });
+        }
+    }
 }
 
 auto catalog_to_str(Catalog const& catalog) -> std::string
@@ -91,7 +117,7 @@ auto get_catalog_json(std::string const& board) -> std::string
             result = json;
         },
         [](std::string const& e) {
-            std::printf("Exception: %s\n", e.c_str());
+            fprintf(stderr, "Exception: %s\n", e.c_str());
         });
 
     return result;
@@ -107,7 +133,7 @@ auto get_thread_json(std::string const& board, std::string const& thread) -> std
             result = json;
         },
         [](std::string const& e) {
-            std::printf("Exception: %s\n", e.c_str());
+            fprintf(stderr, "Exception: %s\n", e.c_str());
         });
 
     return result;
@@ -123,7 +149,7 @@ auto get_catalog_obj(std::string const& board) -> std::optional<Catalog>
             result = catalog;
         },
         [&result](std::string const& e) {
-            std::printf("Exception: %s\n", e.c_str());
+            fprintf(stderr, "Exception: %s\n", e.c_str());
             result = std::nullopt;
         });
 
@@ -139,7 +165,7 @@ auto get_thread_obj(std::string const& board, std::string const& thread) -> std:
             result = thread;
         },
         [&result](std::string const& e) {
-            std::printf("Exception: %s\n", e.c_str());
+            fprintf(stderr, "Exception: %s\n", e.c_str());
             result = std::nullopt;
         });
 
@@ -150,12 +176,12 @@ auto get_catalog() -> void
 {
     if (pargs.optj) {
         std::string result = get_catalog_json(pargs.argc);
-        std::printf("%s\n", result.c_str());
+        fprintf(stdout, "%s\n", result.c_str());
     } else {
         auto result = get_catalog_obj(pargs.argc);
         if (result.has_value()) {
             char const* converted = catalog_to_str(result.value()).c_str();
-            std::printf("%s\n", converted);
+            fprintf(stdout, "%s\n", converted);
         }
     }
 }
@@ -164,12 +190,16 @@ auto get_thread() -> void
 {
     if (pargs.optj) {
         std::string result = get_thread_json(pargs.argb, pargs.argt);
-        std::printf("%s\n", result.c_str());
+        fprintf(stdout, "%s\n", result.c_str());
     } else {
         auto result = get_thread_obj(pargs.argb, pargs.argt);
         if (result.has_value()) {
-            char const* converted = thread_to_str(result.value()).c_str();
-            std::printf("%s\n", converted);
+            if (pargs.opti) {
+                thread_download_files(result.value());
+            } else {
+                char const* converted = thread_to_str(result.value()).c_str();
+                fprintf(stdout, "%s\n", converted);
+            }
         }
     }
 }
