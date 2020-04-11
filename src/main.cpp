@@ -35,6 +35,8 @@ static struct argp_option options[] = {
     { 0 }
 };
 
+int error_code = 0;
+
 auto argopts_debug() -> void
 {
     fprintf(stdout,
@@ -92,6 +94,7 @@ auto thread_download_files(Thread const& thread) -> void
                 [](bool success) {},
                 [](std::string const& e) {
                     fprintf(stderr, "Exception: %s\n", e.c_str());
+                    error_code = 1;
                 });
         }
     }
@@ -108,6 +111,7 @@ auto catalog_download_files(Catalog const& catalog) -> void
                 [](bool success) {},
                 [](std::string const& e) {
                     fprintf(stderr, "Exception: %s\n", e.c_str());
+                    error_code = 1;
                 });
         }
     }
@@ -134,6 +138,7 @@ auto get_catalog_json(std::string const& board) -> std::string
         },
         [](std::string const& e) {
             fprintf(stderr, "Exception: %s\n", e.c_str());
+            error_code = 1;
         });
 
     return result;
@@ -150,6 +155,7 @@ auto get_thread_json(std::string const& board, std::string const& thread) -> std
         },
         [](std::string const& e) {
             fprintf(stderr, "Exception: %s\n", e.c_str());
+            error_code = 1;
         });
 
     return result;
@@ -167,6 +173,8 @@ auto get_catalog_obj(std::string const& board) -> std::optional<Catalog>
         [&result](std::string const& e) {
             fprintf(stderr, "Exception: %s\n", e.c_str());
             result = std::nullopt;
+
+            error_code = 1;
         });
 
     return result;
@@ -183,6 +191,8 @@ auto get_thread_obj(std::string const& board, std::string const& thread) -> std:
         [&result](std::string const& e) {
             fprintf(stderr, "Exception: %s\n", e.c_str());
             result = std::nullopt;
+
+            error_code = 1;
         });
 
     return result;
@@ -237,5 +247,5 @@ auto main(int argc, char** argv) -> int
         get_thread();
     }
 
-    return 0;
+    return error_code;
 }
