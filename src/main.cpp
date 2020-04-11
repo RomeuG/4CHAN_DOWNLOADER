@@ -122,9 +122,46 @@ auto catalog_to_str(Catalog const& catalog) -> std::string
     return "catalog";
 }
 
-auto thread_to_str(Thread const& catalog) -> std::string
+auto thread_to_str(Thread const& thread) -> std::string
 {
-    return "thread";
+    std::string result = "";
+
+    for (auto& post : thread.posts) {
+        result += post.name + " ";
+        result += post.tripcode + " ";
+
+        if (post.file.has_value()) {
+            result += post.file->name + post.file->ext;
+            result += " (" + std::to_string(post.file->w) +
+                      "x" + std::to_string(post.file->h) + ") ";
+        }
+
+        result += post.date + " ";
+        result += std::to_string(post.postnumber) + "\n";
+
+        //result += post.sub + "\n"; // checking
+        result += "Media: http://i.4cdn.org/" + std::string(pargs.argb) + "/" + std::to_string(post.file->tim) + post.file->ext + "\n"; // check tim
+
+        for (auto& text : post.text) {
+            switch (text.type) {
+                case TextType::PLAINTEXT:
+                    result += text.text;
+                    break;
+                case TextType::ITALICS:
+                    result += "/";
+                    result += text.text;
+                    result += "/";
+                    break;
+                default:
+                    result += text.text;
+                    break;
+            }
+        }
+
+        result += "\n\n";
+    }
+
+    return result;
 }
 
 auto get_catalog_json(std::string const& board) -> std::string
