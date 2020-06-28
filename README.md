@@ -8,31 +8,32 @@ Example usage where we get the information of the thread 76542350 from /g/:
 
 Part of the output will be:
 ``` text
-Anonymous  06/27/20(Sat)20:43:56 76542456
-Media: http://i.4cdn.org/g/0
->>76542401
->>76542425
-this except its my job
+Anonymous  test.png (1250x1250) 06/27/20(Sat)21:29:55 76542951
+Media: http://i.4cdn.org/g/1593307795491.png
+>>76542350
+having fun making mazes in go
 
-Anonymous  06/27/20(Sat)20:44:25 76542458
-Media: http://i.4cdn.org/g/0
->>76542425
-Surround yourself with parentheses
+Anonymous  06/27/20(Sat)21:30:20 76542957
+>>76542932
+what did he do this time?
 
-Anonymous  06/27/20(Sat)20:46:21 76542471
-Media: http://i.4cdn.org/g/0
->>76542425
-Use D instead.
+Anonymous  06/27/20(Sat)21:33:18 76542980
+>>76542804
+Because clojure took its place
 
-Anonymous  06/27/20(Sat)20:47:09 76542481
-Media: http://i.4cdn.org/g/0
-while read -u3 file; do mpv "$file"; (( $? == 4 )) && echo "deleting $file" && rm "$file"; done 3< <(ls | shuf)
-Uh, how do I exit this bash loop?
+Anonymous  06/27/20(Sat)21:34:32 76543000
+>>76542980
+Is Clojure a Lisp?
 
-Anonymous  06/27/20(Sat)20:47:21 76542483
-Media: http://i.4cdn.org/g/0
->>76542481
-Ctrl-D
+Anonymous  06/27/20(Sat)21:37:12 76543028
+>>76542350
+Has anyone on /g/ even used Dylan? Does it even have a modern compiler?
+
+Anonymous  06/27/20(Sat)21:37:37 76543033
+>>76542934
+Build your own String tokenizer.
+
+https://docs.oracle.com/javase/7/docs/api/java/util/StringTokenizer.ht
 ```
 
 The overall usage is:
