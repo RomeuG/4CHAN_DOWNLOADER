@@ -8,32 +8,30 @@ Example usage where we get the information of the thread 76542350 from /g/:
 
 Part of the output will be:
 ``` text
-Anonymous  test.png (1250x1250) 06/27/20(Sat)21:29:55 76542951
-Media: http://i.4cdn.org/g/1593307795491.png
+Anonymous  pepe-d.png (1298x720) 06/27/20(Sat)20:32:15 76542350
+Media: http://i.4cdn.org/g/1593304335611.png
+Learn Nim: https://nim-lang.org/learn.html
+Learn Fortran: https://www.fortrantutorial.com/
+Learn F#: https://docs.microsoft.com/en-us/dotnet/fsharp/
+Learn Pascal: http://www.pascal-programming.info/index.php
+Learn Java: https://java-programming.mooc.fi/
+Learn C++: https://www.learncpp.com/
+Learn APL: http://www.microapl.com/apl/tutorial_contents.html
+Learn R: https://www.tutorialspoint.com/r/index.htm
+Learn Perl: https://perldoc.perl.org/
+Learn Dylan: https://opendylan.org/books/dpg/
+
+Previous: >>76531609
+
+Anonymous  06/27/20(Sat)20:34:39 76542375
 >>76542350
-having fun making mazes in go
+Lisp is the most powerful programming language.
 
-Anonymous  06/27/20(Sat)21:30:20 76542957
->>76542932
-what did he do this time?
+Anonymous  06/27/20(Sat)20:35:07 76542380
+I hate programming but I hate everything else more
 
-Anonymous  06/27/20(Sat)21:33:18 76542980
->>76542804
-Because clojure took its place
-
-Anonymous  06/27/20(Sat)21:34:32 76543000
->>76542980
-Is Clojure a Lisp?
-
-Anonymous  06/27/20(Sat)21:37:12 76543028
->>76542350
-Has anyone on /g/ even used Dylan? Does it even have a modern compiler?
-
-Anonymous  06/27/20(Sat)21:37:37 76543033
->>76542934
-Build your own String tokenizer.
-
-https://docs.oracle.com/javase/7/docs/api/java/util/StringTokenizer.ht
+Anonymous  06/27/20(Sat)20:35:47 76542385
+In 2020, C# is the best all-around programming language.
 ```
 
 The overall usage is:
