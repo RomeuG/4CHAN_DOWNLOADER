@@ -276,7 +276,7 @@ auto main(int argc, char** argv) -> int
     static struct argp argp = { options, argp_parseopts, args_doc, doc, 0, 0, 0 };
     argp_parse(&argp, argc, argv, 0, 0, &pargs);
 
-    argopts_debug();
+    //argopts_debug();
 
     if (pargs.optc) {
         get_catalog();
