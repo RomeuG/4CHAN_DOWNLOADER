@@ -140,7 +140,9 @@ auto thread_to_str(Thread const& thread) -> std::string
         result += std::to_string(post.postnumber) + "\n";
 
         //result += post.sub + "\n"; // checking
-        result += "Media: http://i.4cdn.org/" + std::string(pargs.argb) + "/" + std::to_string(post.file->tim) + post.file->ext + "\n"; // check tim
+        if (post.file.has_value()) {
+            result += "Media: http://i.4cdn.org/" + std::string(pargs.argb) + "/" + std::to_string(post.file->tim) + post.file->ext + "\n"; // check tim
+        }
 
         for (auto& text : post.text) {
             switch (text.type) {
