@@ -6,7 +6,7 @@ use fourchan_sdk::{
     models::thread::Thread,
 };
 
-fn thread_to_str(thread: &Thread) -> String {
+fn thread_to_str(thread: &Thread, board: &str) -> String {
     let mut result: String = String::new();
 
     for post in &thread.posts {
@@ -23,10 +23,29 @@ fn thread_to_str(thread: &Thread) -> String {
         }
 
         // post file
-        // post date
-        // post number
-        let post_number = format!("no.{}\n", &post.no);
-        result.push_str(post_number.as_str());
+        if let Some(filename) = &post.filename {
+            let w = &post.w.unwrap();
+            let h = &post.h.unwrap();
+            let ext = post.ext.as_ref().unwrap();
+            let date = &post.now;
+
+            let ftext = format!("{}{} ({}x{}) {} ", filename, ext, w, h, date);
+            result.push_str(ftext.as_str());
+
+            let post_number = format!("no.{}\n", &post.no);
+            result.push_str(post_number.as_str());
+
+            let furl = format!(
+                "Media: http://i.4cdn.org/{}/{}{}\n",
+                board,
+                &post.tim.unwrap(),
+                ext
+            );
+            result.push_str(furl.as_str());
+        } else {
+            let post_number = format!("no.{}\n", &post.no);
+            result.push_str(post_number.as_str());
+        }
 
         if let Some(text) = &post.com {
             let post_text = html_parse_post(&text);
@@ -38,14 +57,12 @@ fn thread_to_str(thread: &Thread) -> String {
                     TextType::Link(t, _) => {
                         result.push_str(&t);
                     }
-                    TextType::Quote(t) => {
+                    TextType::Quote(t) | TextType::PlainText(t) => {
                         result.push_str(&t);
                     }
                     TextType::Italics(t) => {
-                        result.push_str(&t);
-                    }
-                    TextType::PlainText(t) => {
-                        result.push_str(&t);
+                        let _italics = format!("/{}/", &t);
+                        result.push_str(_italics.as_str());
                     }
                 }
             }
@@ -140,7 +157,7 @@ fn main() {
             println!("{}", result);
         } else {
             let result = get_thread(board, thread);
-            let thread_text = thread_to_str(&result);
+            let thread_text = thread_to_str(&result, &board);
             println!("{}", thread_text);
         }
     }
