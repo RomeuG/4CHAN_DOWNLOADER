@@ -47,6 +47,11 @@ fn thread_to_str(thread: &Thread, board: &str) -> String {
             result.push_str(post_number.as_str());
         }
 
+        if let Some(title) = &post.sub {
+            let _title = format!("Title: {}\n", title);
+            result.push_str(_title.as_str());
+        }
+
         if let Some(text) = &post.com {
             let post_text = html_parse_post(&text);
             for texttype in post_text {
