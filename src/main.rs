@@ -69,6 +69,9 @@ fn thread_to_str(thread: &Thread, board: &str) -> String {
                         let _italics = format!("/{}/", &t);
                         result.push_str(_italics.as_str());
                     }
+                    TextType::Code(t) => {
+                        result.push_str(t.as_str());
+                    }
                 }
             }
         }
