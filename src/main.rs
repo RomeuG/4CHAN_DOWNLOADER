@@ -1,7 +1,9 @@
 use fourchan_sdk::{
     core::{
         html::{html_parse_post, TextType},
-        repository::{self, get_catalog, get_catalog_json, get_thread, get_thread_json},
+        repository::{
+            self, get_boards, get_catalog, get_catalog_json, get_thread, get_thread_json,
+        },
     },
     models::thread::Thread,
 };
@@ -86,7 +88,7 @@ fn main() {
     let args = clap::App::new("newsboat-archiver")
         .version("1.0")
         .author("Romeu Vieira <romeu.bizz@gmail.com>")
-        .about("Archive Newsboat DB information")
+        .about("4Chan Downloader")
         .arg(
             clap::Arg::with_name("Json")
                 .short("j")
@@ -151,7 +153,14 @@ fn main() {
 
         if arg_has_json {
             let result = get_catalog_json(catalog);
-            println!("{}", result);
+            match result {
+                Ok(s) => {
+                    println!("{}", s);
+                }
+                Err(e) => {
+                    println!("{}", e);
+                }
+            }
         } else {
             let result = get_catalog(catalog);
             // display as image board in a string
@@ -162,11 +171,25 @@ fn main() {
 
         if arg_has_json {
             let result = get_thread_json(board, thread);
-            println!("{}", result);
+            match result {
+                Ok(s) => {
+                    println!("{}", s);
+                }
+                Err(e) => {
+                    println!("{}", e);
+                }
+            }
         } else {
             let result = get_thread(board, thread);
-            let thread_text = thread_to_str(&result, &board);
-            println!("{}", thread_text);
+            match result {
+                Ok(s) => {
+                    let thread_text = thread_to_str(&s, &board);
+                    println!("{}", thread_text);
+                }
+                Err(e) => {
+                    println!("{}", e);
+                }
+            }
         }
     }
 }
