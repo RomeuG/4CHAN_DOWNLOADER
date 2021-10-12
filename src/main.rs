@@ -56,24 +56,31 @@ fn thread_to_str(thread: &Thread, board: &str) -> String {
 
         if let Some(text) = &post.com {
             let post_text = html_parse_post(&text);
-            for texttype in post_text {
-                match texttype {
-                    TextType::NewLine => {
-                        result.push_str("\n");
+            match post_text {
+                Ok(vec) => {
+                    for texttype in vec {
+                        match texttype {
+                            TextType::NewLine => {
+                                result.push_str("\n");
+                            }
+                            TextType::Link(t, _) => {
+                                result.push_str(&t);
+                            }
+                            TextType::Quote(t) | TextType::PlainText(t) => {
+                                result.push_str(&t);
+                            }
+                            TextType::Italics(t) => {
+                                let _italics = format!("/{}/", &t);
+                                result.push_str(_italics.as_str());
+                            }
+                            TextType::Code(t) => {
+                                result.push_str(t.as_str());
+                            }
+                        }
                     }
-                    TextType::Link(t, _) => {
-                        result.push_str(&t);
-                    }
-                    TextType::Quote(t) | TextType::PlainText(t) => {
-                        result.push_str(&t);
-                    }
-                    TextType::Italics(t) => {
-                        let _italics = format!("/{}/", &t);
-                        result.push_str(_italics.as_str());
-                    }
-                    TextType::Code(t) => {
-                        result.push_str(t.as_str());
-                    }
+                }
+                Err(e) => {
+                    println!("Parsing error: {}", e);
                 }
             }
         }
