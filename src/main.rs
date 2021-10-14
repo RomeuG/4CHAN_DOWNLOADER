@@ -5,94 +5,119 @@ use fourchan_sdk::{
             self, get_boards, get_catalog, get_catalog_json, get_thread, get_thread_json,
         },
     },
+    models::catalog::Catalog,
+    models::catalog::CatalogItem,
+    models::post::Post,
     models::thread::Thread,
 };
+
+fn post_to_str(post: &Post, board: &str) -> String {
+    let mut result: String = String::new();
+
+    // post name
+    if let Some(name) = &post.name {
+        let _name = format!("{} ", name);
+        result.push_str(_name.as_str());
+    }
+
+    // post tripcode
+    if let Some(tripcode) = &post.trip {
+        let _tripcode = format!("{} ", tripcode);
+        result.push_str(_tripcode.as_str());
+    }
+
+    // post file
+    if let Some(filename) = &post.filename {
+        let w = &post.w.unwrap();
+        let h = &post.h.unwrap();
+        let ext = post.ext.as_ref().unwrap();
+        let date = &post.now;
+
+        let ftext = format!("{}{} ({}x{}) {} ", filename, ext, w, h, date);
+        result.push_str(ftext.as_str());
+
+        let post_number = format!("no.{}\n", &post.no);
+        result.push_str(post_number.as_str());
+
+        let furl = format!(
+            "Media: http://i.4cdn.org/{}/{}{}\n",
+            board,
+            &post.tim.unwrap(),
+            ext
+        );
+        result.push_str(furl.as_str());
+    } else {
+        let post_number = format!("no.{}\n", &post.no);
+        result.push_str(post_number.as_str());
+    }
+
+    if let Some(title) = &post.sub {
+        let _title = format!("Title: {}\n", title);
+        result.push_str(_title.as_str());
+    }
+
+    if let Some(text) = &post.com {
+        let post_text = html_parse_post(&text);
+        match post_text {
+            Ok(vec) => {
+                for texttype in vec {
+                    match texttype {
+                        TextType::NewLine => {
+                            result.push_str("\n");
+                        }
+                        TextType::Link(t, _) => {
+                            result.push_str(&t);
+                        }
+                        TextType::Quote(t) | TextType::PlainText(t) => {
+                            result.push_str(&t);
+                        }
+                        TextType::Italics(t) => {
+                            let _italics = format!("/{}/", &t);
+                            result.push_str(_italics.as_str());
+                        }
+                        TextType::Code(t) => {
+                            result.push_str(t.as_str());
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Parsing error: {}", e);
+            }
+        }
+    }
+
+    result.push_str("\n\n");
+
+    return result;
+}
 
 fn thread_to_str(thread: &Thread, board: &str) -> String {
     let mut result: String = String::new();
 
     for post in &thread.posts {
-        // post name
-        if let Some(name) = &post.name {
-            let _name = format!("{} ", name);
-            result.push_str(_name.as_str());
+        let post_str = post_to_str(post, board);
+        result.push_str(&post_str);
+    }
+
+    return result;
+}
+
+fn catalog_to_str(catalog: &Catalog, board: &str) -> String {
+    let mut result: String = String::new();
+
+    for catalog_item in catalog {
+        for post in catalog_item.threads.iter() {
+            let post_str = post_to_str(post, board);
+            result.push_str(&post_str);
         }
-
-        // post tripcode
-        if let Some(tripcode) = &post.trip {
-            let _tripcode = format!("{} ", tripcode);
-            result.push_str(_tripcode.as_str());
-        }
-
-        // post file
-        if let Some(filename) = &post.filename {
-            let w = &post.w.unwrap();
-            let h = &post.h.unwrap();
-            let ext = post.ext.as_ref().unwrap();
-            let date = &post.now;
-
-            let ftext = format!("{}{} ({}x{}) {} ", filename, ext, w, h, date);
-            result.push_str(ftext.as_str());
-
-            let post_number = format!("no.{}\n", &post.no);
-            result.push_str(post_number.as_str());
-
-            let furl = format!(
-                "Media: http://i.4cdn.org/{}/{}{}\n",
-                board,
-                &post.tim.unwrap(),
-                ext
-            );
-            result.push_str(furl.as_str());
-        } else {
-            let post_number = format!("no.{}\n", &post.no);
-            result.push_str(post_number.as_str());
-        }
-
-        if let Some(title) = &post.sub {
-            let _title = format!("Title: {}\n", title);
-            result.push_str(_title.as_str());
-        }
-
-        if let Some(text) = &post.com {
-            let post_text = html_parse_post(&text);
-            match post_text {
-                Ok(vec) => {
-                    for texttype in vec {
-                        match texttype {
-                            TextType::NewLine => {
-                                result.push_str("\n");
-                            }
-                            TextType::Link(t, _) => {
-                                result.push_str(&t);
-                            }
-                            TextType::Quote(t) | TextType::PlainText(t) => {
-                                result.push_str(&t);
-                            }
-                            TextType::Italics(t) => {
-                                let _italics = format!("/{}/", &t);
-                                result.push_str(_italics.as_str());
-                            }
-                            TextType::Code(t) => {
-                                result.push_str(t.as_str());
-                            }
-                        }
-                    }
-                }
-                Err(e) => {
-                    println!("Parsing error: {}", e);
-                }
-            }
-        }
-
-        result.push_str("\n\n");
     }
 
     return result;
 }
 
 fn main() {
-    let args = clap::App::new("newsboat-archiver")
+    let args = clap::App::new("4chan-downloader")
         .version("1.0")
         .author("Romeu Vieira <romeu.bizz@gmail.com>")
         .about("4Chan Downloader")
@@ -170,7 +195,15 @@ fn main() {
             }
         } else {
             let result = get_catalog(catalog);
-            // display as image board in a string
+            match result {
+                Ok(c) => {
+                    let catalog_text = catalog_to_str(&c, &catalog);
+                    println!("{}", catalog_text);
+                }
+                Err(e) => {
+                    println!("{}", e);
+                }
+            }
         }
     } else if arg_has_thread {
         let board = arg_board.unwrap();
