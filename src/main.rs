@@ -128,14 +128,6 @@ fn main() {
                 .help("Output as JSON"),
         )
         .arg(
-            clap::Arg::with_name("Catalog")
-                .short("c")
-                .long("catalog")
-                .value_name("CATALOG")
-                .help("Get catalog")
-                .takes_value(true),
-        )
-        .arg(
             clap::Arg::with_name("Board")
                 .short("b")
                 .long("board")
@@ -170,64 +162,63 @@ fn main() {
         .get_matches();
 
     let arg_has_json = args.is_present("Json");
-    let arg_has_catalog = args.is_present("Catalog");
     let arg_has_board = args.is_present("Board");
     let arg_has_thread = args.is_present("Thread");
 
-    let arg_catalog = args.value_of("Catalog");
     let arg_board = args.value_of("Board");
     let arg_thread = args.value_of("Thread");
     let arg_file = args.value_of("File");
     let arg_images = args.value_of("Images");
 
-    if arg_has_catalog {
-        let catalog = arg_catalog.unwrap();
-
-        if arg_has_json {
-            let result = get_catalog_json(catalog);
-            match result {
-                Ok(s) => {
-                    println!("{}", s);
-                }
-                Err(e) => {
-                    println!("{}", e);
-                }
-            }
-        } else {
-            let result = get_catalog(catalog);
-            match result {
-                Ok(c) => {
-                    let catalog_text = catalog_to_str(&c, &catalog);
-                    println!("{}", catalog_text);
-                }
-                Err(e) => {
-                    println!("{}", e);
-                }
-            }
-        }
-    } else if arg_has_thread {
+    if arg_has_board {
         let board = arg_board.unwrap();
-        let thread = arg_thread.unwrap();
 
-        if arg_has_json {
-            let result = get_thread_json(board, thread);
-            match result {
-                Ok(s) => {
-                    println!("{}", s);
+        if arg_has_thread {
+            let thread = arg_thread.unwrap();
+
+            if arg_has_json {
+                let result = get_thread_json(board, thread);
+                match result {
+                    Ok(s) => {
+                        println!("{}", s);
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                    }
                 }
-                Err(e) => {
-                    println!("{}", e);
+            } else {
+                let result = get_thread(board, thread);
+                match result {
+                    Ok(s) => {
+                        let thread_text = thread_to_str(&s, &board);
+                        println!("{}", thread_text);
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                    }
                 }
             }
         } else {
-            let result = get_thread(board, thread);
-            match result {
-                Ok(s) => {
-                    let thread_text = thread_to_str(&s, &board);
-                    println!("{}", thread_text);
+            if arg_has_json {
+                let result = get_catalog_json(board);
+                match result {
+                    Ok(s) => {
+                        println!("{}", s);
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                    }
                 }
-                Err(e) => {
-                    println!("{}", e);
+            } else {
+                let result = get_catalog(board);
+                match result {
+                    Ok(c) => {
+                        let catalog_text = catalog_to_str(&c, &board);
+                        println!("{}", catalog_text);
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                    }
                 }
             }
         }
