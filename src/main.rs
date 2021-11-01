@@ -1,14 +1,14 @@
+use std::fs::File;
+
 use fourchan_sdk::{
     core::{
         html::{html_parse_post, TextType},
-        repository::{
-            self, get_boards, get_catalog, get_catalog_json, get_thread, get_thread_json,
-        },
+        repository::{get_catalog, get_catalog_json, get_thread, get_thread_json},
     },
     models::catalog::Catalog,
-    models::catalog::CatalogItem,
     models::post::Post,
     models::thread::Thread,
+    traits::operations::Operations,
 };
 
 fn post_to_str(post: &Post, board: &str) -> String {
@@ -144,14 +144,6 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
-            clap::Arg::with_name("File")
-                .short("f")
-                .long("file")
-                .value_name("FILE")
-                .help("Get file")
-                .takes_value(true),
-        )
-        .arg(
             clap::Arg::with_name("Images")
                 .short("i")
                 .long("images")
@@ -164,10 +156,10 @@ fn main() {
     let arg_has_json = args.is_present("Json");
     let arg_has_board = args.is_present("Board");
     let arg_has_thread = args.is_present("Thread");
+    let arg_has_image = args.is_present("Images");
 
     let arg_board = args.value_of("Board");
     let arg_thread = args.value_of("Thread");
-    let arg_file = args.value_of("File");
     let arg_images = args.value_of("Images");
 
     if arg_has_board {
@@ -189,9 +181,46 @@ fn main() {
             } else {
                 let result = get_thread(board, thread);
                 match result {
-                    Ok(s) => {
-                        let thread_text = thread_to_str(&s, &board);
-                        println!("{}", thread_text);
+                    Ok(t) => {
+                        if arg_has_image {
+                            let image_dir = arg_images.unwrap();
+
+                            for post in t.posts.into_iter() {
+                                if post.filename.is_some() {
+                                    match post.get_file_url(board) {
+                                        Ok(url) => {
+                                            let filename = post.filename.unwrap();
+                                            let extension = post.ext.unwrap();
+
+                                            let path =
+                                                format!("{}/{}{}", image_dir, filename, extension);
+                                            let img_bytes = reqwest::blocking::get(url)
+                                                .unwrap()
+                                                .bytes()
+                                                .unwrap();
+                                            let mut cursor = std::io::Cursor::new(img_bytes);
+
+                                            let mut file = File::create(&path)
+                                                .expect("File could not be created");
+                                            match std::io::copy(&mut cursor, &mut file) {
+                                                Ok(_) => {
+                                                    println!("Downloaded file: {}", path);
+                                                }
+                                                Err(e) => {
+                                                    eprintln!("{}", e);
+                                                }
+                                            }
+                                        }
+                                        Err(e) => {
+                                            eprintln!("{}", e);
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            let thread_text = thread_to_str(&t, &board);
+                            println!("{}", thread_text);
+                        }
                     }
                     Err(e) => {
                         eprintln!("{}", e);

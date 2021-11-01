@@ -8,4 +8,6 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.3"
-fourchan-sdk = { git = "https://github.com/RomeuG/4chan-sdk" }
+# fourchan-sdk = { git = "https://github.com/RomeuG/4chan-sdk" }
+fourchan-sdk = { path = "../4chan-sdk" }
+reqwest = { version = "0.11.4", features = ["blocking", "json"]}
