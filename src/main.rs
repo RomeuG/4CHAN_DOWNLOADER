@@ -14,6 +14,20 @@ use fourchan_sdk::{
 fn post_to_str(post: &Post, board: &str) -> String {
     let mut result: String = String::new();
 
+    // post link
+    let board_url = fourchan_sdk::CHAN_LIST.get(board);
+    if let Some(url) = &board_url {
+        if post.resto != 0 {
+            let final_url = format!("{}thread/{}#p{}", url, &post.resto, &post.no);
+            let string = format!("Link: {}\n", final_url);
+            result.push_str(string.as_str());
+        } else {
+            let final_url = format!("{}thread/{}#p{}", url, &post.no, &post.no);
+            let string = format!("Link: {}\n", final_url);
+            result.push_str(string.as_str());
+        }
+    }
+
     // post name
     if let Some(name) = &post.name {
         let _name = format!("{} ", name);

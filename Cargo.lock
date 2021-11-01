@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "fourchan-sdk",
+ "reqwest",
 ]
 
 [[package]]
@@ -161,7 +162,6 @@ dependencies = [
 [[package]]
 name = "fourchan-sdk"
 version = "0.1.0"
-source = "git+https://github.com/RomeuG/4chan-sdk#376aa6d8795062374dd41d15eae75c0a1bc207f9"
 dependencies = [
  "html5ever",
  "lazy_static",
