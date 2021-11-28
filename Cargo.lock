@@ -162,6 +162,7 @@ dependencies = [
 [[package]]
 name = "fourchan-sdk"
 version = "0.1.0"
+source = "git+https://github.com/RomeuG/4chan-sdk#df940bdaea09788a736b32390bf3f9c6486e5bfa"
 dependencies = [
  "html5ever",
  "lazy_static",

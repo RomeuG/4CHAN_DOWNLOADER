@@ -7,50 +7,39 @@ Example usage where we get the information of the thread 76542350 from /g/:
 `./4CHAN_DOWNLOADER -b g -t 76542350`
 
 Part of the output will be:
-``` text
-Anonymous  pepe-d.png (1298x720) 06/27/20(Sat)20:32:15 76542350
-Media: http://i.4cdn.org/g/1593304335611.png
-Learn Nim: https://nim-lang.org/learn.html
-Learn Fortran: https://www.fortrantutorial.com/
-Learn F#: https://docs.microsoft.com/en-us/dotnet/fsharp/
-Learn Pascal: http://www.pascal-programming.info/index.php
-Learn Java: https://java-programming.mooc.fi/
-Learn C++: https://www.learncpp.com/
-Learn APL: http://www.microapl.com/apl/tutorial_contents.html
-Learn R: https://www.tutorialspoint.com/r/index.htm
-Learn Perl: https://perldoc.perl.org/
-Learn Dylan: https://opendylan.org/books/dpg/
+```text
+Link: https://boards.4channel.org/g/thread/84494522#p84494522
+Anonymous url.jpg (966x399) 11/27/21(Sat)12:07:13 no.84494522
+Media: http://i.4cdn.org/g/1638032833733.jpg
+I installed Linux, what now?
 
-Previous: >>76531609
+Link: https://boards.4channel.org/g/thread/84494522#p84494630
+Anonymous no.84494630
+>>84494522
+throw your computer out of the window
 
-Anonymous  06/27/20(Sat)20:34:39 76542375
->>76542350
-Lisp is the most powerful programming language.
-
-Anonymous  06/27/20(Sat)20:35:07 76542380
-I hate programming but I hate everything else more
-
-Anonymous  06/27/20(Sat)20:35:47 76542385
-In 2020, C# is the best all-around programming language.
+Link: https://boards.4channel.org/g/thread/84494522#p84494676
+Anonymous no.84494676
+change wallpaper, post neofetch/desktop, then reinstall windows
 ```
 
 The overall usage is:
-``` text
-Usage: 4CHAN_DOWNLOADER [OPTION...] [FILENAME]...
-Software to download 4chan threads.
+```text
+4chan-downloader 1.0
+Romeu Vieira <romeu.bizz@gmail.com>
+4Chan Downloader
 
-  -b, --board=value          Board option.
-  -c, --catalog=value        Get catalog.
-  -f, --file=value           Get file.
-  -i, --images=value         Get images.
-  -j, --json                 Print json as output.
-  -t, --thread=value         Get thread.
-  -?, --help                 Give this help list
-      --usage                Give a short usage message
-  -V, --version              Print program version
+USAGE:
+    FOURCHAN_DOWNLOADER [FLAGS] [OPTIONS]
 
-Mandatory or optional arguments to long options are also mandatory or optional
-for any corresponding short options.
+FLAGS:
+    -j, --json       Output as JSON
+    -h, --help       Prints help information
+    -V, --version    Prints version information
 
-Report bugs to <romeu.bizz@gmail.com>.
+OPTIONS:
+    -b, --board <BOARD>      4chan board
+    -i, --images <DIR>       Get images
+    -t, --thread <THREAD>    Thread id
 ```
+
